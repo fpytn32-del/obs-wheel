@@ -2,13 +2,14 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = process.env.PORT || 3000;
+// ВАЖНО: Берем порт, который дает хостинг, или 10000 по умолчанию для Render
+const PORT = process.env.PORT || 10000; 
 const DATA_FILE = path.join(__dirname, 'data.json');
-const ADMIN_PASSWORD = "VikaWheel2024"; // ПОМЕНЯЙ ЭТОТ ПАРОЛЬ!
+const ADMIN_PASSWORD = "VikaWheel2024"; // Твой пароль
 
 if (!fs.existsSync(DATA_FILE)) {
     fs.writeFileSync(DATA_FILE, JSON.stringify({
-        options: ["Ничего", "Джекпот — 10 000 ₽", "1 000 ₽ на баланс казино", "Бонуска"],
+        options: ["Ничего", "Джекпот — 10 000 ₽"],
         history: [],
         settings: { spinSound: "spin.mp3", startBtnText: "Да-да, Нет-нет" },
         lastUpdate: Date.now()
@@ -31,30 +32,42 @@ const server = http.createServer((req, res) => {
 
         if (fs.existsSync(fullPath) && fs.lstatSync(fullPath).isFile()) {
             const ext = path.extname(fullPath);
-            const contentType = { '.html': 'text/html', '.mp3': 'audio/mpeg' }[ext] || 'text/plain';
+            const contentType = { 
+                '.html': 'text/html', 
+                '.mp3': 'audio/mpeg',
+                '.json': 'application/json' 
+            }[ext] || 'text/plain';
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(fs.readFileSync(fullPath));
-        } else { res.writeHead(404); res.end(); }
+        } else {
+            res.writeHead(404);
+            res.end();
+        }
 
     } else if (req.method === 'POST' && req.url === '/api/data') {
         let body = '';
         req.on('data', chunk => body += chunk.toString());
         req.on('end', () => {
-            const incomingData = JSON.parse(body);
-            
-            // ПРОВЕРКА ПАРОЛЯ
-            if (incomingData.password !== ADMIN_PASSWORD) {
-                res.writeHead(403);
-                return res.end(JSON.stringify({ status: 'error', message: 'Wrong Password' }));
+            try {
+                const incomingData = JSON.parse(body);
+                if (incomingData.password !== ADMIN_PASSWORD) {
+                    res.writeHead(403);
+                    return res.end(JSON.stringify({ status: 'error', message: 'Wrong Password' }));
+                }
+                delete incomingData.password;
+                incomingData.lastUpdate = Date.now();
+                fs.writeFileSync(DATA_FILE, JSON.stringify(incomingData));
+                res.writeHead(200);
+                res.end(JSON.stringify({ status: 'ok' }));
+            } catch (e) {
+                res.writeHead(400);
+                res.end();
             }
-
-            delete incomingData.password; // Удаляем пароль перед сохранением в файл
-            incomingData.lastUpdate = Date.now();
-            fs.writeFileSync(DATA_FILE, JSON.stringify(incomingData));
-            res.writeHead(200);
-            res.end(JSON.stringify({ status: 'ok' }));
         });
     }
 });
 
-server.listen(PORT, () => console.log(`🚀 Сервер на порту: ${PORT}`));
+// СЛУШАЕМ НА 0.0.0.0 — это критически важно для облачных серверов!
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Server is running on port ${PORT}`);
+});
