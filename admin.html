@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Wheel Admin Security</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f0f0f; color: #fff; padding: 20px; display: flex; justify-content: center; }
+        .card { background: #1a1a1a; padding: 30px; border-radius: 20px; width: 450px; border: 1px solid #333; }
+        h3 { margin-top: 0; color: #ffd700; border-bottom: 1px solid #333; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        label { display: block; margin: 15px 0 5px; font-size: 11px; color: #666; text-transform: uppercase; }
+        textarea, input { width: 100%; background: #252525; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; box-sizing: border-box; margin-bottom: 10px; }
+        .pass-field { border: 1px solid #ffd700; background: #1a1a00; }
+        button { width: 100%; padding: 15px; background: #ffd700; color: #000; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-del { width: auto; padding: 4px 8px; background: #ff4757; color: white; margin: 0; font-size: 10px; }
+        .history-list { margin-top: 20px; max-height: 150px; overflow-y: auto; background: #111; padding: 10px; border-radius: 10px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 5px; padding: 5px; border-bottom: 1px solid #222; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h3>⚙ Настройки</h3>
+    
+    <label>Пароль доступа:</label>
+    <input type="password" id="admin-password" class="pass-field" placeholder="Введите пароль">
+
+    <label>Варианты:</label>
+    <textarea id="opts" style="height: 80px;"></textarea>
+
+    <label>Текст кнопки:</label>
+    <input type="text" id="btn-text">
+
+    <button onclick="save()">Сохранить изменения</button>
+
+    <div id="history-box" class="history-list"></div>
+    <button style="background: #333; color: #888; font-size: 10px;" onclick="clearAllHistory()">Очистить историю</button>
+</div>
+
+<script>
+    let fullData = {};
+    async function load() {
+        const res = await fetch('/api/data');
+        fullData = await res.json();
+        document.getElementById('opts').value = fullData.options.join('\n');
+        document.getElementById('btn-text').value = fullData.settings.startBtnText;
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const box = document.getElementById('history-box');
+        box.innerHTML = fullData.history.slice().reverse().map((item, i) => `
+            <div class="history-item"><span>${item}</span><button class="btn-del" onclick="deleteHistoryItem(${fullData.history.length - 1 - i})">✕</button></div>
+        `).join('');
+    }
+
+    async function deleteHistoryItem(index) { fullData.history.splice(index, 1); await save(true); }
+    async function clearAllHistory() { if(confirm("Очистить?")) { fullData.history = []; await save(true); } }
+
+    async function save(silent = false) {
+        const pass = document.getElementById('admin-password').value;
+        if (!pass && !silent) return alert("Введите пароль!");
+
+        fullData.options = document.getElementById('opts').value.split('\n').filter(s => s.trim());
+        fullData.settings.startBtnText = document.getElementById('btn-text').value;
+        fullData.password = pass; // Временно добавляем пароль для отправки
+
+        const res = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(fullData)
+        });
+
+        if (res.status === 403) {
+            alert("Ошибка: Неверный пароль!");
+        } else {
+            if(!silent) alert("Данные обновлены!");
+            load(); // Перезагружаем, чтобы очистить поле пароля в объекте
+        }
+    }
+    load();
+</script>
+</body>
+</html>
