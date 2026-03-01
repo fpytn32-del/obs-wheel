@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Wheel Admin</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f0f0f; color: #fff; padding: 20px; display: flex; justify-content: center; }
+        .card { background: #1a1a1a; padding: 30px; border-radius: 20px; width: 450px; border: 1px solid #333; }
+        h3 { margin-top: 0; color: #ffd700; border-bottom: 1px solid #333; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        label { display: block; margin: 15px 0 5px; font-size: 13px; color: #888; }
+        textarea, input { width: 100%; background: #252525; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #ffd700; color: #000; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: 15px; }
+        .history-list { margin-top: 20px; max-height: 200px; overflow-y: auto; background: #222; border-radius: 10px; padding: 10px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 8px 12px; margin-bottom: 5px; border-radius: 8px; font-size: 13px; border: 1px solid #333; }
+        .btn-del { width: auto; padding: 4px 8px; background: #ff4757; color: white; margin: 0; font-size: 10px; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h3>⚙ Настройки</h3>
+    <label>Варианты:</label>
+    <textarea id="opts" style="height: 100px;"></textarea>
+    <label>Текст кнопки:</label>
+    <input type="text" id="btn-text">
+    <label>Имя файла звука в папке:</label>
+    <input type="text" id="win-sound" placeholder="Например: spin.mp3">
+    <button onclick="save()">Сохранить</button>
+    <div id="history-box" class="history-list"></div>
+    <button style="background: #444; color: #ccc; font-size: 11px;" onclick="clearAllHistory()">Очистить историю</button>
+</div>
+<script>
+    let fullData = {};
+    async function load() {
+        const res = await fetch('/api/data');
+        fullData = await res.json();
+        document.getElementById('opts').value = fullData.options.join('\n');
+        document.getElementById('btn-text').value = fullData.settings.startBtnText;
+        document.getElementById('win-sound').value = fullData.settings.spinSound;
+        renderHistory();
+    }
+    function renderHistory() {
+        const box = document.getElementById('history-box');
+        box.innerHTML = fullData.history.slice().reverse().map((item, i) => `
+            <div class="history-item"><span>${item}</span><button class="btn-del" onclick="deleteHistoryItem(${fullData.history.length - 1 - i})">✕</button></div>
+        `).join('');
+    }
+    async function deleteHistoryItem(index) { fullData.history.splice(index, 1); await save(true); }
+    async function clearAllHistory() { if(confirm("Очистить?")) { fullData.history = []; await save(true); } }
+    async function save(silent = false) {
+        fullData.options = document.getElementById('opts').value.split('\n').filter(s => s.trim());
+        fullData.settings.startBtnText = document.getElementById('btn-text').value;
+        fullData.settings.spinSound = document.getElementById('win-sound').value;
+        await fetch('/api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fullData) });
+        if(!silent) alert("Обновлено!");
+        renderHistory();
+    }
+    load();
+</script>
+</body>
+</html>
