@@ -19,16 +19,15 @@
         }
         body:not(.idle) #ui-column { opacity: 0; visibility: hidden; }
 
-        /* --- ПРЕМИАЛЬНЫЕ ПАНЕЛИ (ЗОЛОТО + RGB ОБВОДКА) --- */
+        /* --- ПРЕМИАЛЬНЫЕ ПАНЕЛИ (ЗОЛОТО + RGB) --- */
         .premium-panel {
             position: relative;
-            width: 500px;
             border-radius: 35px;
-            padding: 5px; /* Толщина RGB рамки */
+            padding: 2.5px; /* ТОНКАЯ RGB ОБВОДКА */
             background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
             background-size: 400% 400%;
             animation: rgb-move 4s linear infinite;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.6);
             overflow: hidden;
         }
 
@@ -38,10 +37,11 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Внутренняя часть плашки (Плотное Золото) */
         .panel-inner {
-            background: linear-gradient(135deg, #d4af37 0%, #f1d56e 50%, #8a6d3b 100%);
-            border-radius: 30px;
+            /* ПРОЗРАЧНОЕ НО НАСЫЩЕННОЕ ЗОЛОТО */
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.6) 0%, rgba(255, 215, 0, 0.5) 50%, rgba(138, 109, 59, 0.6) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
             width: 100%;
             height: 100%;
             display: flex;
@@ -49,43 +49,52 @@
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
-            border: 2px solid rgba(255,255,255,0.4); /* Внутренняя золотая каемка */
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
         /* КНОПКА ЗАПУСКА */
-        .start-plate { height: 120px; cursor: pointer; pointer-events: auto; margin-bottom: 35px; }
+        .start-plate { width: 500px; height: 120px; cursor: pointer; pointer-events: auto; margin-bottom: 30px; transition: transform 0.2s; }
         .start-plate:active { transform: scale(0.96); }
 
         .start-text {
             color: #fff; font-size: 50px; font-weight: 900; text-transform: uppercase;
             letter-spacing: 2px;
-            /* МЯГКАЯ ОБВОДКА ТЕКСТА */
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.8), -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5), -1px -1px 0 rgba(0,0,0,0.7), 1px -1px 0 rgba(0,0,0,0.7), -1px 1px 0 rgba(0,0,0,0.7), 1px 1px 0 rgba(0,0,0,0.7);
         }
 
-        /* ИСТОРИЯ ВЫИГРЫШЕЙ (КОНВЕЙЕР) */
-        #history-container { width: 420px; height: 260px; pointer-events: auto; }
-        
-        #history-title {
-            font-size: 13px; font-weight: 900; letter-spacing: 4px; color: #fff;
-            margin-top: 12px; margin-bottom: 5px;
-            text-shadow: 1px 1px 3px #000;
+        /* ИСТОРИЯ ВЫИГРЫШЕЙ (КОМПАКТНАЯ) */
+        #history-container { 
+            width: 340px; /* МЕНЬШЕ ШИРИНА */
+            height: 200px; /* МЕНЬШЕ ВЫСОТА */
+            pointer-events: auto; 
+        }
+        #history-title { 
+            font-size: 11px; font-weight: 900; letter-spacing: 3px; color: #fff; 
+            margin-top: 8px; margin-bottom: 3px; text-shadow: 1px 1px 3px #000; z-index: 10; 
         }
 
-        #history-viewport { width: 100%; height: 180px; overflow: hidden; position: relative; }
+        #history-viewport { 
+            width: 100%; height: 135px; overflow: hidden; position: relative; 
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+        }
 
         #history-list {
             display: flex; flex-direction: column; align-items: center;
             width: 100%; position: absolute; top: 0; left: 0;
-            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            animation: conveyor-scroll 15s linear infinite;
+        }
+
+        @keyframes conveyor-scroll {
+            from { transform: translateY(0); }
+            to { transform: translateY(-50%); }
         }
 
         .history-item { 
-            color: #fff; font-size: 18px; font-weight: 800; 
+            color: #fff; font-size: 15px; font-weight: 800; /* МЕНЬШЕ ШРИФТ */
             padding: 8px 0; width: 90%; text-align: center;
             text-transform: uppercase;
             border-bottom: 1px solid rgba(0,0,0,0.1);
-            text-shadow: 1px 1px 5px rgba(0,0,0,0.8), -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
         }
 
         /* ПОБЕДНАЯ ПЛАШКА */
@@ -107,14 +116,12 @@
 <body class="idle">
 
 <div id="ui-column">
-    <!-- Кнопка -->
     <div class="start-plate premium-panel" onclick="startSpin()">
         <div class="panel-inner">
             <div class="start-text">Да-да, Нет-нет</div>
         </div>
     </div>
     
-    <!-- История -->
     <div id="history-container" class="premium-panel">
         <div class="panel-inner">
             <div id="history-title">ИСТОРИЯ ВЫИГРЫШЕЙ</div>
@@ -143,8 +150,6 @@
         <canvas id="wheel" width="620" height="620"></canvas>
     </div>
 </div>
-
-<script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 
 <script>
     let options = [], history = [], settings = {}, lastUpdate = 0;
@@ -176,7 +181,14 @@
 
     function updateHistoryUI() {
         const list = document.getElementById('history-list');
-        list.innerHTML = (history || []).slice().reverse().map(h => `<div class="history-item">${h}</div>`).join('');
+        if (!history.length) {
+            list.innerHTML = '<div class="history-item">ОЖИДАНИЕ...</div>';
+            return;
+        }
+        const itemsHTML = history.slice().reverse().map(h => `<div class="history-item">${h}</div>`).join('');
+        list.innerHTML = itemsHTML + itemsHTML;
+        const duration = Math.max(12, history.length * 3.5);
+        list.style.animationDuration = duration + 's';
     }
 
     function draw() {
@@ -265,9 +277,9 @@
         document.getElementById('winner-name').innerText = winner;
         const nameEl = document.getElementById('winner-name');
         let baseSize = 48;
-        if (winner.length > 35) baseSize = 20;
-        else if (winner.length > 25) baseSize = 26;
-        else if (winner.length > 15) baseSize = 36;
+        if (winner.length > 35) baseSize = 18;
+        else if (winner.length > 25) baseSize = 24;
+        else if (winner.length > 15) baseSize = 34;
         nameEl.style.fontSize = baseSize + "px";
         document.body.classList.add('winner-active');
         history.push(winner);
