@@ -16,18 +16,18 @@ const initialData = {
         flavorTexts: {},
         autoDelete: false,
         remoteTrigger: 0,
-        // ДИЗАЙН ПАНЕЛЕЙ
-        panelOpacity: 0.6,
+        // ДИЗАЙН И ПОЗИЦИИ (Твои пресеты)
+        panelOpacity: 0.7,
         panelBlur: 15,
-        panelBorderWidth: 3,
-        // ПОЗИЦИИ (в px или %)
-        startBtnTop: 250, startBtnLeft: 50,
-        historyTop: 500, historyLeft: 50,
-        // РАЗМЕРЫ ТЕКСТА
-        fontWheel: 14, fontBtn: 50, fontHist: 18,
-        // ЦВЕТА
-        wheelBorderColor: "#1a1a1a",
-        goldRingColor: "#ffd700"
+        startBtnTop: 100, startBtnLeft: 50,
+        historyTop: 260, historyLeft: 50,
+        // ШРИФТЫ (Стили и размеры)
+        fontWheel: 14, fontWheelFamily: 'Inter',
+        fontBtn: 50, fontBtnFamily: 'Inter',
+        fontHist: 16, fontHistFamily: 'Inter',
+        // СТРЕЛКА
+        arrowType: 'classic',
+        arrowColor: '#ffffff'
     },
     lastUpdate: Date.now()
 };
@@ -57,9 +57,7 @@ const server = http.createServer((req, res) => {
         req.on('end', () => {
             try {
                 const incoming = JSON.parse(body);
-                if (incoming.password !== ADMIN_PASSWORD) {
-                    res.writeHead(403); return res.end();
-                }
+                if (incoming.password !== ADMIN_PASSWORD) { res.writeHead(403); return res.end(); }
                 const currentData = JSON.parse(fs.readFileSync(DATA_FILE));
                 const newData = { ...currentData, ...incoming, lastUpdate: Date.now() };
                 delete newData.password;
