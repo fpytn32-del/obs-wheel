@@ -6,28 +6,29 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 const ADMIN_PASSWORD = "VikaWheel2024";
 
 const initialData = {
-    options: ["Ничего", "Приз 1", "Приз 2"],
+    options: ["Ничего", "Приз 1"],
     history: [],
     settings: { 
         spinSound: "spin.mp3",
         startBtnText: "Да-да, Нет-нет",
-        centerImage: "https://media.tenor.com/On79Z75UvS8AAAAC/cat-dance.gif",
+        historyTitle: "ИСТОРИЯ ВЫИГРЫШЕЙ",
+        centerImage: "",
         spinTime: 12000,
         flavorTexts: {},
         autoDelete: false,
         remoteTrigger: 0,
-        // ДИЗАЙН И ПОЗИЦИИ (Твои пресеты)
         panelOpacity: 0.7,
         panelBlur: 15,
-        startBtnTop: 100, startBtnLeft: 50,
-        historyTop: 260, historyLeft: 50,
-        // ШРИФТЫ (Стили и размеры)
+        // ПОЗИЦИИ И РАЗМЕРЫ
+        startBtnTop: 100, startBtnLeft: 50, startBtnWidth: 500, startBtnHeight: 110,
+        historyTop: 260, historyLeft: 50, historyWidth: 340, historyHeight: 200,
+        // ШРИФТЫ
         fontWheel: 14, fontWheelFamily: 'Inter',
         fontBtn: 50, fontBtnFamily: 'Inter',
-        fontHist: 16, fontHistFamily: 'Inter',
+        fontHist: 15, fontHistFamily: 'Inter',
+        fontHistTitle: 11,
         // СТРЕЛКА
-        arrowType: 'classic',
-        arrowColor: '#ffffff'
+        arrowType: 'classic', arrowColor: '#ffffff'
     },
     lastUpdate: Date.now()
 };
