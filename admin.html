@@ -2,67 +2,64 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Wheel Admin Dashboard</title>
+    <title>Wheel Dashboard PRO</title>
     <style>
         body { font-family: sans-serif; background: #080808; color: #eee; padding: 20px; display: flex; justify-content: center; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; max-width: 1200px; width: 100%; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; max-width: 1300px; width: 100%; }
         .card { background: #121212; padding: 20px; border-radius: 20px; border: 1px solid #333; }
         h3 { color: #ffd700; text-transform: uppercase; font-size: 11px; border-bottom: 1px solid #222; padding-bottom: 8px; margin: 0 0 15px 0; }
         label { display: block; margin: 8px 0 3px; font-size: 9px; color: #666; font-weight: 800; text-transform: uppercase; }
-        textarea, input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 6px; box-sizing: border-box; font-size: 12px; outline: none; }
+        textarea, input, select { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 6px; box-sizing: border-box; font-size: 12px; outline: none; }
         button { width: 100%; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; margin-top: 10px; }
         .spin-btn { background: #ff4757 !important; color: #fff !important; font-size: 16px; height: 50px; }
+        .flavor-row { display: flex; gap: 5px; margin-bottom: 5px; }
         #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 15px 40px; border-radius: 50px; font-weight: 900; transition: 0.5s; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         #toast.show { top: 30px; }
-        .flavor-row { display: flex; gap: 5px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
-    <div id="toast">ИЗМЕНЕНИЯ ПРИМЕНЕНЫ!</div>
+    <div id="toast">ИЗМЕНЕНИЯ СОХРАНЕНЫ!</div>
     <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#080808; z-index:2000; display:flex; justify-content:center; align-items:center;">
-        <div class="card" style="width:280px; text-align:center;">
+        <div class="card" style="width:300px; text-align:center;">
             <h3>Security Access</h3>
             <input type="password" id="pass-input" placeholder="Пароль...">
             <button onclick="tryLogin()">ВОЙТИ</button>
         </div>
     </div>
-
     <div class="grid" id="main-ui" style="display:none;">
         <div class="card">
             <button class="spin-btn" onclick="triggerSpin()">🚀 КРУТИТЬ КОЛЕСО</button>
-            <h3>📝 Тексты</h3>
-            <textarea id="opts" style="height:100px;"></textarea>
+            <h3>📝 Основное</h3>
+            <textarea id="opts" style="height:120px;"></textarea>
             <label>Текст кнопки:</label><input type="text" id="btn-text">
+            <label>Заголовок призов:</label><input type="text" id="hist-title">
             <label>Время вращения (мс):</label><input type="number" id="spin-time">
             <label><input type="checkbox" id="auto-del"> Удалять при выигрыше</label>
         </div>
-
         <div class="card">
             <h3>📏 Позиции и Размеры</h3>
             <label>Кнопка (W x H x Top):</label>
             <div class="flavor-row"><input type="number" id="btn-w"><input type="number" id="btn-h"><input type="number" id="btn-y"></div>
             <label>Призы (W x H x Top):</label>
             <div class="flavor-row"><input type="number" id="hist-w"><input type="number" id="hist-h"><input type="number" id="hist-y"></div>
-            <label>Прозрачность (0-1) / Blur:</label>
+            <label>Прозрачность (0.1-1) / Blur:</label>
             <div class="flavor-row"><input type="number" id="p-op" step="0.1"><input type="number" id="p-blur"></div>
             <label>URL гифки центра:</label><input type="text" id="center-img">
             <button onclick="save()" style="background:#fff;">ПРИМЕНИТЬ ДИЗАЙН</button>
         </div>
-
         <div class="card">
             <h3>✏️ Шрифты (px)</h3>
-            <label>Колесо / Кнопка / Список:</label>
-            <div class="flavor-row"><input type="number" id="f-wheel"><input type="number" id="f-btn"><input type="number" id="f-hist"></div>
-            
+            <label>Колесо / Кнопка / Список / Заголовок:</label>
+            <div class="flavor-row"><input type="number" id="f-wheel"><input type="number" id="f-btn"><input type="number" id="f-hist"><input type="number" id="f-hist-t"></div>
             <h3>💬 Фразы</h3>
-            <div id="flavor-list" style="max-height:100px; overflow-y:auto; margin-bottom:10px;"></div>
+            <div id="flavor-list" style="max-height:100px; overflow-y:auto; margin-bottom:5px;"></div>
             <button style="background:#222; color:#fff; font-size:9px;" onclick="addFlavor()">+ Добавить фразу</button>
             <button onclick="save()">СОХРАНИТЬ ВСЁ</button>
         </div>
     </div>
-
 <script>
-    let fullData = {}; let currentPass = localStorage.getItem('spin_pass') || "";
+    let fullData = { options: [], settings: {}, history: [] };
+    let currentPass = localStorage.getItem('spin_pass') || "";
     async function tryLogin() {
         const input = document.getElementById('pass-input').value;
         if (input) currentPass = input;
@@ -79,29 +76,33 @@
         const s = fullData.settings || {};
         document.getElementById('opts').value = (fullData.options || []).join('\n');
         document.getElementById('btn-text').value = s.startBtnText || "Да-да, Нет-нет";
+        document.getElementById('hist-title').value = s.historyTitle || "ПРИЗЫ";
         document.getElementById('spin-time').value = s.spinTime || 12000;
         document.getElementById('auto-del').checked = s.autoDelete || false;
+        document.getElementById('center-img').value = s.centerImage || "";
         document.getElementById('btn-w').value = s.startBtnWidth || 500;
         document.getElementById('btn-h').value = s.startBtnHeight || 110;
         document.getElementById('btn-y').value = s.startBtnTop || 100;
         document.getElementById('hist-w').value = s.historyWidth || 340;
-        document.getElementById('hist-h').value = s.historyHeight || 220;
-        document.getElementById('hist-y').value = s.historyTop || 210;
+        document.getElementById('hist-h').value = s.historyHeight || 200;
+        document.getElementById('hist-y').value = s.historyTop || 260;
         document.getElementById('p-op').value = s.panelOpacity || 0.7;
         document.getElementById('p-blur').value = s.panelBlur || 15;
         document.getElementById('f-wheel').value = s.fontWheel || 14;
         document.getElementById('f-btn').value = s.fontBtn || 50;
-        document.getElementById('f-hist').value = s.fontHist || 16;
-        document.getElementById('center-img').value = s.centerImage || "";
+        document.getElementById('f-hist').value = s.fontHist || 15;
+        document.getElementById('f-hist-t').value = s.fontHistTitle || 11;
         const fl = document.getElementById('flavor-list'); fl.innerHTML = '';
-        for(let [p,t] of Object.entries(s.flavorTexts || {})) fl.innerHTML += `<div class="flavor-row"><input value="${p}" class="f-p"><input value="${t}" class="f-t"></div>`;
+        if(s.flavorTexts) { for(let [p,t] of Object.entries(s.flavorTexts)) fl.innerHTML += `<div class="flavor-row"><input value="${p}" class="f-p"><input value="${t}" class="f-t"></div>`; }
     }
     async function save(silent = false) {
         fullData.options = document.getElementById('opts').value.split('\n').filter(x => x.trim());
         if(!fullData.settings) fullData.settings = {};
         const s = fullData.settings;
         s.startBtnText = document.getElementById('btn-text').value;
+        s.historyTitle = document.getElementById('hist-title').value;
         s.spinTime = parseInt(document.getElementById('spin-time').value);
+        s.centerImage = document.getElementById('center-img').value;
         s.autoDelete = document.getElementById('auto-del').checked;
         s.startBtnWidth = parseInt(document.getElementById('btn-w').value);
         s.startBtnHeight = parseInt(document.getElementById('btn-h').value);
@@ -114,8 +115,12 @@
         s.fontWheel = parseInt(document.getElementById('f-wheel').value);
         s.fontBtn = parseInt(document.getElementById('f-btn').value);
         s.fontHist = parseInt(document.getElementById('f-hist').value);
-        s.centerImage = document.getElementById('center-img').value;
-        const f = {}; document.querySelectorAll('.flavor-row').forEach(r => { if(r.querySelector('.f-p').value) f[r.querySelector('.f-p').value] = r.querySelector('.f-t').value; });
+        s.fontHistTitle = parseInt(document.getElementById('f-hist-t').value);
+        const f = {}; 
+        document.querySelectorAll('.flavor-row').forEach(r => { 
+            const pEl = r.querySelector('.f-p'); const tEl = r.querySelector('.f-t');
+            if(pEl && tEl && pEl.value) f[pEl.value] = tEl.value;
+        });
         s.flavorTexts = f; fullData.password = currentPass;
         const res = await fetch('/api/data', { method: 'POST', body: JSON.stringify(fullData) });
         if(res.status === 200 && !silent) { document.getElementById('toast').classList.add('show'); setTimeout(()=>document.getElementById('toast').classList.remove('show'), 2000); }
