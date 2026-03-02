@@ -2,57 +2,54 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Wheel Admin Ultra</title>
+    <title>Wheel Control Center</title>
     <style>
         body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; padding: 20px; display: flex; justify-content: center; }
-        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 900px; width: 100%; }
-        .card { background: #161616; padding: 25px; border-radius: 20px; border: 1px solid #333; }
-        h3 { color: #ffd700; text-transform: uppercase; letter-spacing: 2px; font-size: 16px; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; }
-        label { display: block; margin: 10px 0 5px; font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; }
-        textarea, input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; box-sizing: border-box; font-size: 13px; outline: none; }
-        input:focus { border-color: #ffd700; }
-        button { width: 100%; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; margin-top: 10px; transition: 0.2s; }
-        .history-list { max-height: 200px; overflow-y: auto; background: #000; padding: 10px; border-radius: 10px; }
-        .history-item { display: flex; justify-content: space-between; font-size: 12px; padding: 5px; border-bottom: 1px solid #222; }
-        .btn-del { width: auto; background: #ff4757; color: #fff; padding: 2px 6px; font-size: 9px; margin: 0; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1000px; width: 100%; }
+        .card { background: #161616; padding: 20px; border-radius: 15px; border: 1px solid #333; }
+        h3 { color: #ffd700; text-transform: uppercase; font-size: 14px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        label { display: block; margin: 10px 0 5px; font-size: 11px; color: #888; }
+        textarea, input { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .spin-btn { background: #ff4757; color: #fff; font-size: 20px; height: 80px; margin-bottom: 20px; }
         .flavor-row { display: flex; gap: 5px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
-    <div id="login" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;z-index:100;display:flex;justify-content:center;align-items:center;">
-        <div class="card" style="width:300px;text-align:center;">
-            <h3>Вход в систему</h3>
+    <div id="login" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;z-index:200;display:flex;justify-content:center;align-items:center;">
+        <div class="card" style="width:300px; text-align:center;">
+            <h3>Вход</h3>
             <input type="password" id="pass" placeholder="Пароль...">
-            <button onclick="checkPass()">ВОЙТИ</button>
+            <button onclick="load()">ВОЙТИ</button>
         </div>
     </div>
 
-    <div class="container">
+    <div class="grid" id="main-ui" style="display:none;">
         <div class="card">
-            <h3>⚙ Основные настройки</h3>
+            <button class="spin-btn" onclick="triggerRemoteSpin()">🚀 КРУТИТЬ КОЛЕСО</button>
+            <h3>⚙ Контент и Дизайн</h3>
             <label>Варианты (с новой строки):</label>
-            <textarea id="opts" style="height: 100px;"></textarea>
-            
+            <textarea id="opts" style="height:100px;"></textarea>
             <label>Текст кнопки:</label>
             <input type="text" id="btn-text">
-
-            <label>URL гифки в центре:</label>
+            <label>Высота кнопки (px):</label>
+            <input type="number" id="btn-y">
+            <label>Высота истории (px):</label>
+            <input type="number" id="hist-y">
+            <label>URL гифки центра:</label>
             <input type="text" id="center-img">
-
-            <label>Время вращения (мс):</label>
-            <input type="number" id="spin-time" placeholder="12000">
-
+            <label><input type="checkbox" id="auto-del"> Удалять выпавший вариант автоматически</label>
             <button onclick="save()">СОХРАНИТЬ ВСЁ</button>
         </div>
 
         <div class="card">
-            <h3>💬 Фразы над призами</h3>
+            <h3>📜 История и Фразы</h3>
+            <div id="history-box" style="max-height:150px; overflow-y:auto; background:#000; padding:10px;"></div>
+            <button style="background:#333; color:#ccc; font-size:10px;" onclick="clearHistory()">Очистить историю</button>
+            
+            <h3 style="margin-top:20px;">💬 Настройка фраз</h3>
             <div id="flavor-list"></div>
             <button style="background:#222; color:#fff; font-size:10px;" onclick="addFlavor()">+ Добавить фразу</button>
-
-            <h3 style="margin-top:20px;">📜 История</h3>
-            <div id="history-box" class="history-list"></div>
-            <button style="background:#333; color:#888; font-size:10px;" onclick="clearHistory()">Очистить историю</button>
         </div>
     </div>
 
@@ -60,17 +57,14 @@
     let fullData = {};
     let pass = localStorage.getItem('spin_pass') || "";
 
-    function checkPass() {
-        pass = document.getElementById('pass').value;
-        load();
-    }
-
     async function load() {
+        const p = document.getElementById('pass').value || pass;
         const res = await fetch('/api/data');
         fullData = await res.json();
         if(res.status === 200) {
+            pass = p; localStorage.setItem('spin_pass', pass);
             document.getElementById('login').style.display = 'none';
-            localStorage.setItem('spin_pass', pass);
+            document.getElementById('main-ui').style.display = 'grid';
             fillFields();
         }
     }
@@ -78,58 +72,47 @@
     function fillFields() {
         document.getElementById('opts').value = fullData.options.join('\n');
         document.getElementById('btn-text').value = fullData.settings.startBtnText;
+        document.getElementById('btn-y').value = fullData.settings.startBtnY;
+        document.getElementById('hist-y').value = fullData.settings.historyY;
         document.getElementById('center-img').value = fullData.settings.centerImage;
-        document.getElementById('spin-time').value = fullData.settings.spinTime;
+        document.getElementById('auto-del').checked = fullData.settings.autoDelete;
         
         const fList = document.getElementById('flavor-list');
         fList.innerHTML = '';
-        for (let [prize, text] of Object.entries(fullData.settings.flavorTexts || {})) {
-            fList.innerHTML += `<div class="flavor-row">
-                <input placeholder="Приз" value="${prize}" class="f-prize">
-                <input placeholder="Фраза" value="${text}" class="f-text">
-            </div>`;
+        for (let [p, t] of Object.entries(fullData.settings.flavorTexts)) {
+            fList.innerHTML += `<div class="flavor-row"><input value="${p}" class="f-p"><input value="${t}" class="f-t"></div>`;
         }
         renderHistory();
     }
 
     function renderHistory() {
-        const box = document.getElementById('history-box');
-        box.innerHTML = (fullData.history || []).slice().reverse().map((item, i) => `
-            <div class="history-item"><span>${item}</span><button class="btn-del" onclick="deleteHistoryItem(${fullData.history.length-1-i})">✕</button></div>
-        `).join('');
+        document.getElementById('history-box').innerHTML = (fullData.history || []).slice().reverse().map((h, i) => `<div>${h} <button onclick="delH(${fullData.history.length-1-i})" style="width:auto; padding:2px; font-size:8px;">✕</button></div>`).join('');
     }
 
-    function addFlavor() {
-        document.getElementById('flavor-list').innerHTML += `<div class="flavor-row"><input placeholder="Приз" class="f-prize"><input placeholder="Фраза" class="f-text"></div>`;
-    }
-
-    async function deleteHistoryItem(i) { fullData.history.splice(i, 1); save(true); }
+    async function delH(i) { fullData.history.splice(i,1); save(true); }
     async function clearHistory() { fullData.history = []; save(true); }
+    function addFlavor() { document.getElementById('flavor-list').innerHTML += `<div class="flavor-row"><input class="f-p"><input class="f-t"></div>`; }
+
+    async function triggerRemoteSpin() {
+        fullData.settings.remoteTrigger = Date.now();
+        save(true);
+    }
 
     async function save(silent = false) {
         fullData.options = document.getElementById('opts').value.split('\n').filter(s => s.trim());
         fullData.settings.startBtnText = document.getElementById('btn-text').value;
+        fullData.settings.startBtnY = parseInt(document.getElementById('btn-y').value);
+        fullData.settings.historyY = parseInt(document.getElementById('hist-y').value);
         fullData.settings.centerImage = document.getElementById('center-img').value;
-        fullData.settings.spinTime = parseInt(document.getElementById('spin-time').value);
+        fullData.settings.autoDelete = document.getElementById('auto-del').checked;
         fullData.password = pass;
 
-        const flavors = {};
-        document.querySelectorAll('.flavor-row').forEach(row => {
-            const p = row.querySelector('.f-prize').value;
-            const t = row.querySelector('.f-text').value;
-            if(p) flavors[p] = t;
-        });
-        fullData.settings.flavorTexts = flavors;
+        const f = {};
+        document.querySelectorAll('.flavor-row').forEach(r => { if(r.querySelector('.f-p').value) f[r.querySelector('.f-p').value] = r.querySelector('.f-t').value; });
+        fullData.settings.flavorTexts = f;
 
-        const res = await fetch('/api/data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(fullData)
-        });
-        if(res.status === 200) {
-            if(!silent) alert("Обновлено!");
-            load();
-        } else alert("Ошибка пароля!");
+        const res = await fetch('/api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fullData) });
+        if(res.status === 200) { if(!silent) alert("OK!"); load(); }
     }
     if(pass) load();
 </script>
