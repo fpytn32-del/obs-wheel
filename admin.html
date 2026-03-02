@@ -2,77 +2,75 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Wheel Admin Dashboard</title>
+    <title>Wheel Admin Ultra</title>
     <style>
-        body { font-family: sans-serif; background: #080808; color: #eee; padding: 20px; display: flex; justify-content: center; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; max-width: 1200px; width: 100%; }
-        .card { background: #121212; padding: 20px; border-radius: 20px; border: 1px solid #333; }
-        h3 { color: #ffd700; text-transform: uppercase; font-size: 11px; border-bottom: 1px solid #222; padding-bottom: 8px; margin: 0 0 15px 0; }
-        label { display: block; margin: 8px 0 3px; font-size: 9px; color: #666; font-weight: 800; text-transform: uppercase; }
-        textarea, input, select { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 6px; box-sizing: border-box; font-size: 12px; outline: none; }
-        button { width: 100%; padding: 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; margin-top: 10px; }
-        .spin-btn { background: #ff4757 !important; color: #fff !important; font-size: 16px; height: 50px; }
-        .flavor-row { display: flex; gap: 5px; margin-bottom: 5px; }
-        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 15px 40px; border-radius: 50px; font-weight: 900; transition: 0.5s; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        body { font-family: 'Inter', sans-serif; background: #080808; color: #eee; padding: 20px; display: flex; justify-content: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1000px; width: 100%; }
+        .card { background: #121212; padding: 20px; border-radius: 20px; border: 1px solid #222; }
+        h3 { color: #ffd700; text-transform: uppercase; font-size: 13px; letter-spacing: 2px; border-bottom: 1px solid #222; padding-bottom: 10px; margin-top: 0; }
+        label { display: block; margin: 10px 0 5px; font-size: 10px; color: #666; font-weight: 800; text-transform: uppercase; }
+        textarea, input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
+        button { width: 100%; padding: 15px; background: #ffd700; color: #000; border: none; border-radius: 10px; font-weight: 900; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        .spin-btn { background: #ff4757; color: #fff; font-size: 20px; height: 80px; margin-bottom: 20px; }
+        
+        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 15px 40px; border-radius: 50px; font-weight: 900; transition: 0.5s; z-index: 1000; }
         #toast.show { top: 30px; }
     </style>
 </head>
 <body>
-    <div id="toast">ДАННЫЕ ОБНОВЛЕНЫ!</div>
+    <div id="toast">НАСТРОЙКИ ПРИМЕНЕНЫ!</div>
 
-    <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#080808; z-index:2000; display:flex; justify-content:center; align-items:center;">
+    <div id="login" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#080808;z-index:200;display:flex;justify-content:center;align-items:center;">
         <div class="card" style="width:300px; text-align:center;">
-            <h3>Security Access</h3>
-            <input type="password" id="pass-input" placeholder="Введите пароль...">
-            <button onclick="tryLogin()">ВОЙТИ</button>
+            <h3>DASHBOARD ACCESS</h3>
+            <input type="password" id="pass" placeholder="Пароль...">
+            <button onclick="load()">ВОЙТИ</button>
         </div>
     </div>
 
     <div class="grid" id="main-ui" style="display:none;">
         <div class="card">
-            <button class="spin-btn" onclick="triggerSpin()">🚀 КРУТИТЬ КОЛЕСО</button>
-            <h3>📝 Основные настройки</h3>
+            <button class="spin-btn" onclick="triggerRemoteSpin()">🚀 КРУТИТЬ КОЛЕСО</button>
+            
+            <h3>🎨 Дизайн и Позиции</h3>
+            <label>Прозрачность панелей (0.1 - 1.0):</label>
+            <input type="number" id="p-opacity" step="0.1" min="0" max="1">
+
+            <label>Высота кнопки (Y px):</label>
+            <input type="number" id="btn-y">
+
+            <label>Высота истории (Y px):</label>
+            <input type="number" id="hist-y">
+
+            <h3 style="margin-top:20px;">✏️ Размеры шрифтов (px)</h3>
+            <label>Текст в секторах колеса:</label>
+            <input type="number" id="f-wheel">
+
+            <label>Текст на кнопке запуска:</label>
+            <input type="number" id="f-btn">
+
+            <label>Текст в истории выигрышей:</label>
+            <input type="number" id="f-hist">
+            
+            <button onclick="save()">ПРИМЕНИТЬ ИЗМЕНЕНИЯ</button>
+        </div>
+
+        <div class="card">
+            <h3>📝 Контент</h3>
+            <label>Варианты (каждый с новой строки):</label>
             <textarea id="opts" style="height:120px;"></textarea>
+            
             <label>Текст кнопки:</label>
             <input type="text" id="btn-text">
-            <label>Заголовок истории:</label>
-            <input type="text" id="hist-title">
-            <label>Время вращения (мс):</label>
-            <input type="number" id="spin-time">
+
             <label>URL гифки центра:</label>
             <input type="text" id="center-img">
+
             <label><input type="checkbox" id="auto-del"> Удалять при выигрыше</label>
-        </div>
 
-        <div class="card">
-            <h3>📏 Позиции и Размеры</h3>
-            <label>Кнопка (W x H x Top):</label>
-            <div class="flavor-row"><input type="number" id="btn-w"><input type="number" id="btn-h"><input type="number" id="btn-y"></div>
-            <label>История (W x H x Top):</label>
-            <div class="flavor-row"><input type="number" id="hist-w"><input type="number" id="hist-h"><input type="number" id="hist-y"></div>
-            
-            <h3>🏹 Дизайн Дракона</h3>
-            <label>URL Дракона / Размер:</label>
-            <div class="flavor-row"><input type="text" id="dragon-img"><input type="number" id="dragon-size"></div>
-            <label>Позиция X / Y (%):</label>
-            <div class="flavor-row"><input type="number" id="dragon-x"><input type="number" id="dragon-y"></div>
-            
-            <button onclick="save()" style="background:#fff;">ПРИМЕНИТЬ ДИЗАЙН</button>
-        </div>
-
-        <div class="card">
-            <h3>✏️ Шрифты (px)</h3>
-            <label>Колесо / Кнопка / История / Заголовок:</label>
-            <div class="flavor-row">
-                <input type="number" id="fs-wheel"><input type="number" id="fs-btn">
-                <input type="number" id="fs-hist"><input type="number" id="fs-hist-t">
-            </div>
-
-            <h3>💬 Фразы (Flavor)</h3>
-            <div id="flavor-list" style="max-height:100px; overflow-y:auto;"></div>
-            <button style="background:#222; color:#fff; font-size:9px;" onclick="addFlavor()">+ Добавить фразу</button>
-            <button onclick="save()" style="background:#ffd700;">СОХРАНИТЬ ВСЁ</button>
-            <button onclick="clearHistory()" style="background:#333; color:#777; font-size:9px; margin-top:10px;">Очистить историю</button>
+            <h3 style="margin-top:20px;">📜 История</h3>
+            <div id="history-box" style="max-height:120px; overflow-y:auto; background:#000; padding:10px; border-radius:10px; font-size:12px;"></div>
+            <button style="background:#222; color:#777; font-size:9px;" onclick="clearHistory()">Очистить историю</button>
         </div>
     </div>
 
@@ -80,89 +78,74 @@
     let fullData = {};
     let pass = localStorage.getItem('spin_pass') || "";
 
-    async function tryLogin() {
-        const input = document.getElementById('pass-input').value;
-        if (input) pass = input;
+    async function load() {
+        const p = document.getElementById('pass').value || pass;
         const res = await fetch('/api/data');
-        if (res.status === 200) {
-            fullData = await res.json();
-            localStorage.setItem('spin_pass', pass);
-            document.getElementById('login-overlay').style.display = 'none';
+        fullData = await res.json();
+        if(res.status === 200) {
+            pass = p; localStorage.setItem('spin_pass', pass);
+            document.getElementById('login').style.display = 'none';
             document.getElementById('main-ui').style.display = 'grid';
-            if (fullData.settings) fillUI();
-        } else { alert("Пароль неверный!"); }
+            fillFields();
+        }
     }
 
-    function fillUI() {
+    function fillFields() {
         const s = fullData.settings;
         document.getElementById('opts').value = fullData.options.join('\n');
         document.getElementById('btn-text').value = s.startBtnText;
-        document.getElementById('hist-title').value = s.historyTitle;
-        document.getElementById('spin-time').value = s.spinTime;
         document.getElementById('center-img').value = s.centerImage;
-        document.getElementById('auto-del').checked = s.autoDelete;
-        document.getElementById('btn-w').value = s.startBtnWidth;
-        document.getElementById('btn-h').value = s.startBtnHeight;
         document.getElementById('btn-y').value = s.startBtnTop;
-        document.getElementById('hist-w').value = s.historyWidth;
-        document.getElementById('hist-h').value = s.historyHeight;
         document.getElementById('hist-y').value = s.historyTop;
-        document.getElementById('dragon-img').value = s.dragonImg;
-        document.getElementById('dragon-size').value = s.dragonSize;
-        document.getElementById('dragon-x').value = s.dragonX;
-        document.getElementById('dragon-y').value = s.dragonY;
-        document.getElementById('fs-wheel').value = s.fontWheel;
-        document.getElementById('fs-btn').value = s.fontBtn;
-        document.getElementById('fs-hist').value = s.fontHist;
-        document.getElementById('fs-hist-t').value = s.fontHistTitle;
+        document.getElementById('p-opacity').value = s.panelOpacity;
+        document.getElementById('auto-del').checked = s.autoDelete;
+        
+        // Шрифты
+        document.getElementById('f-wheel').value = s.fontWheel || 14;
+        document.getElementById('f-btn').value = s.fontBtn || 50;
+        document.getElementById('f-hist').value = s.fontHist || 16;
 
-        const fl = document.getElementById('flavor-list'); fl.innerHTML = '';
-        for(let [p,t] of Object.entries(s.flavorTexts || {})) {
-            fl.innerHTML += `<div class="flavor-row"><input value="${p}" class="f-p"><input value="${t}" class="f-t"></div>`;
-        }
+        renderHistory();
+    }
+
+    function renderHistory() {
+        document.getElementById('history-box').innerHTML = (fullData.history || []).slice().reverse().map(h => `<div>${h}</div>`).join('');
     }
 
     async function save(silent = false) {
-        fullData.options = document.getElementById('opts').value.split('\n').filter(x => x.trim());
         const s = fullData.settings;
+        fullData.options = document.getElementById('opts').value.split('\n').filter(x => x.trim());
         s.startBtnText = document.getElementById('btn-text').value;
-        s.historyTitle = document.getElementById('hist-title').value;
-        s.spinTime = parseInt(document.getElementById('spin-time').value);
         s.centerImage = document.getElementById('center-img').value;
-        s.autoDelete = document.getElementById('auto-del').checked;
-        s.startBtnWidth = parseInt(document.getElementById('btn-w').value);
-        s.startBtnHeight = parseInt(document.getElementById('btn-h').value);
         s.startBtnTop = parseInt(document.getElementById('btn-y').value);
-        s.historyWidth = parseInt(document.getElementById('hist-w').value);
-        s.historyHeight = parseInt(document.getElementById('hist-h').value);
         s.historyTop = parseInt(document.getElementById('hist-y').value);
-        s.dragonImg = document.getElementById('dragon-img').value;
-        s.dragonSize = parseInt(document.getElementById('dragon-size').value);
-        s.dragonX = parseInt(document.getElementById('dragon-x').value);
-        s.dragonY = parseInt(document.getElementById('dragon-y').value);
-        s.fontWheel = parseInt(document.getElementById('fs-wheel').value);
-        s.fontBtn = parseInt(document.getElementById('fs-btn').value);
-        s.fontHist = parseInt(document.getElementById('fs-hist').value);
-        s.fontHistTitle = parseInt(document.getElementById('fs-hist-t').value);
-
-        const f = {}; document.querySelectorAll('.flavor-row').forEach(r => { 
-            const p = r.querySelector('.f-p').value; const t = r.querySelector('.f-t').value;
-            if(p) f[p] = t;
-        });
-        s.flavorTexts = f;
+        s.panelOpacity = parseFloat(document.getElementById('p-opacity').value);
+        s.autoDelete = document.getElementById('auto-del').checked;
+        
+        // Сохраняем шрифты
+        s.fontWheel = parseInt(document.getElementById('f-wheel').value);
+        s.fontBtn = parseInt(document.getElementById('f-btn').value);
+        s.fontHist = parseInt(document.getElementById('f-hist').value);
+        
         fullData.password = pass;
 
-        const res = await fetch('/api/data', { method: 'POST', body: JSON.stringify(fullData) });
-        if(res.status === 200 && !silent) {
-            document.getElementById('toast').classList.add('show');
-            setTimeout(()=>document.getElementById('toast').classList.remove('show'), 2000);
+        const res = await fetch('/api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fullData) });
+        if(res.status === 200) {
+            const t = document.getElementById('toast');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+            load();
         }
     }
 
-    function addFlavor() { document.getElementById('flavor-list').innerHTML += `<div class="flavor-row"><input class="f-p"><input class="f-t"></div>`; }
-    function triggerSpin() { fullData.settings.remoteTrigger = Date.now(); save(true); }
-    function clearHistory() { fullData.history = []; save(true); location.reload(); }
-    if(pass) tryLogin();
+    async function triggerRemoteSpin() {
+        fullData.settings.remoteTrigger = Date.now();
+        save(true);
+    }
+    async function clearHistory() { fullData.history = []; save(true); }
+
+    if(pass) load();
 </script>
 </body>
 </html>
+
