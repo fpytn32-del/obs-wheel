@@ -2,74 +2,91 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Wheel Admin Ultra</title>
+    <title>Wheel Ultra Admin</title>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #080808; color: #eee; padding: 20px; display: flex; justify-content: center; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1000px; width: 100%; }
+        body { font-family: 'Inter', sans-serif; background: #080808; color: #eee; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1100px; width: 100%; }
         .card { background: #121212; padding: 20px; border-radius: 20px; border: 1px solid #222; }
         h3 { color: #ffd700; text-transform: uppercase; font-size: 13px; letter-spacing: 2px; border-bottom: 1px solid #222; padding-bottom: 10px; margin-top: 0; }
         label { display: block; margin: 10px 0 5px; font-size: 10px; color: #666; font-weight: 800; text-transform: uppercase; }
-        textarea, input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
-        button { width: 100%; padding: 15px; background: #ffd700; color: #000; border: none; border-radius: 10px; font-weight: 900; cursor: pointer; margin-top: 15px; transition: 0.2s; }
-        .spin-btn { background: #ff4757; color: #fff; font-size: 20px; height: 80px; margin-bottom: 20px; }
+        textarea, input, select { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
+        .spin-btn { background: #ff4757; color: #fff; font-size: 22px; height: 100px; margin-bottom: 20px; border: none; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 900; box-shadow: 0 10px 30px rgba(255, 71, 87, 0.3); }
+        .save-btn { background: #ffd700; color: #000; width: 100%; margin-top: 20px; font-weight: 900; border: none; padding: 15px; border-radius: 10px; cursor: pointer; }
+        .flavor-row { display: flex; gap: 5px; margin-bottom: 5px; }
         
-        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 15px 40px; border-radius: 50px; font-weight: 900; transition: 0.5s; z-index: 1000; }
+        /* КРАСИВОЕ УВЕДОМЛЕНИЕ */
+        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 15px 40px; border-radius: 50px; font-weight: 900; transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         #toast.show { top: 30px; }
+
+        .slider-group { display: flex; align-items: center; gap: 10px; }
+        .slider-group span { min-width: 30px; font-size: 12px; color: #ffd700; }
     </style>
 </head>
 <body>
-    <div id="toast">НАСТРОЙКИ ПРИМЕНЕНЫ!</div>
+    <div id="toast">ОБНОВЛЕНО!</div>
 
     <div id="login" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#080808;z-index:200;display:flex;justify-content:center;align-items:center;">
         <div class="card" style="width:300px; text-align:center;">
             <h3>DASHBOARD ACCESS</h3>
             <input type="password" id="pass" placeholder="Пароль...">
-            <button onclick="load()">ВОЙТИ</button>
+            <button class="save-btn" onclick="load()">ВОЙТИ</button>
         </div>
     </div>
 
     <div class="grid" id="main-ui" style="display:none;">
         <div class="card">
-            <button class="spin-btn" onclick="triggerRemoteSpin()">🚀 КРУТИТЬ КОЛЕСО</button>
+            <button class="spin-btn" onclick="triggerRemoteSpin()">КРУТИТЬ КОЛЕСО</button>
             
-            <h3>🎨 Дизайн и Позиции</h3>
-            <label>Прозрачность панелей (0.1 - 1.0):</label>
-            <input type="number" id="p-opacity" step="0.1" min="0" max="1">
+            <h3>🎨 Дизайн Панелей</h3>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>Прозрачность (0-1)</label>
+                    <input type="number" id="p-opacity" step="0.1" min="0" max="1">
+                </div>
+                <div>
+                    <label>Размытие (px)</label>
+                    <input type="number" id="p-blur">
+                </div>
+            </div>
 
-            <label>Высота кнопки (Y px):</label>
-            <input type="number" id="btn-y">
+            <h3>📍 Позиции (Отступы)</h3>
+            <label>Кнопка (Сверху / Слева %)</label>
+            <div class="flavor-row">
+                <input type="number" id="btn-y" placeholder="Y">
+                <input type="number" id="btn-x" placeholder="X %">
+            </div>
+            <label>История (Сверху / Слева %)</label>
+            <div class="flavor-row">
+                <input type="number" id="hist-y" placeholder="Y">
+                <input type="number" id="hist-x" placeholder="X %">
+            </div>
 
-            <label>Высота истории (Y px):</label>
-            <input type="number" id="hist-y">
-
-            <h3 style="margin-top:20px;">✏️ Размеры шрифтов (px)</h3>
-            <label>Текст в секторах колеса:</label>
-            <input type="number" id="f-wheel">
-
-            <label>Текст на кнопке запуска:</label>
-            <input type="number" id="f-btn">
-
-            <label>Текст в истории выигрышей:</label>
-            <input type="number" id="f-hist">
+            <h3>✏️ Шрифты</h3>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div><label>Колесо (px)</label><input type="number" id="f-wheel"></div>
+                <div><label>Кнопка (px)</label><input type="number" id="f-btn"></div>
+            </div>
             
-            <button onclick="save()">ПРИМЕНИТЬ ИЗМЕНЕНИЯ</button>
+            <button class="save-btn" onclick="save()">ПРИМЕНИТЬ ДИЗАЙН</button>
         </div>
 
         <div class="card">
-            <h3>📝 Контент</h3>
-            <label>Варианты (каждый с новой строки):</label>
+            <h3>📝 Варианты</h3>
             <textarea id="opts" style="height:120px;"></textarea>
             
             <label>Текст кнопки:</label>
             <input type="text" id="btn-text">
+
+            <label>Время вращения (мс):</label>
+            <input type="number" id="spin-time">
 
             <label>URL гифки центра:</label>
             <input type="text" id="center-img">
 
             <label><input type="checkbox" id="auto-del"> Удалять при выигрыше</label>
 
-            <h3 style="margin-top:20px;">📜 История</h3>
-            <div id="history-box" style="max-height:120px; overflow-y:auto; background:#000; padding:10px; border-radius:10px; font-size:12px;"></div>
+            <h3>📜 История</h3>
+            <div id="history-box" style="max-height:100px; overflow-y:auto; font-size:11px; background:#000; padding:10px; border-radius:10px;"></div>
             <button style="background:#222; color:#777; font-size:9px;" onclick="clearHistory()">Очистить историю</button>
         </div>
     </div>
@@ -77,6 +94,12 @@
 <script>
     let fullData = {};
     let pass = localStorage.getItem('spin_pass') || "";
+
+    function notify() {
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    }
 
     async function load() {
         const p = document.getElementById('pass').value || pass;
@@ -95,55 +118,54 @@
         document.getElementById('opts').value = fullData.options.join('\n');
         document.getElementById('btn-text').value = s.startBtnText;
         document.getElementById('center-img').value = s.centerImage;
-        document.getElementById('btn-y').value = s.startBtnTop;
-        document.getElementById('hist-y').value = s.historyTop;
-        document.getElementById('p-opacity').value = s.panelOpacity;
+        document.getElementById('spin-time').value = s.spinTime;
         document.getElementById('auto-del').checked = s.autoDelete;
         
-        // Шрифты
-        document.getElementById('f-wheel').value = s.fontWheel || 14;
-        document.getElementById('f-btn').value = s.fontBtn || 50;
-        document.getElementById('f-hist').value = s.fontHist || 16;
+        document.getElementById('p-opacity').value = s.panelOpacity;
+        document.getElementById('p-blur').value = s.panelBlur;
+        document.getElementById('btn-y').value = s.startBtnTop;
+        document.getElementById('btn-x').value = s.startBtnLeft;
+        document.getElementById('hist-y').value = s.historyTop;
+        document.getElementById('hist-x').value = s.historyLeft;
+        document.getElementById('f-wheel').value = s.fontWheel;
+        document.getElementById('f-btn').value = s.fontBtn;
 
         renderHistory();
     }
 
     function renderHistory() {
-        document.getElementById('history-box').innerHTML = (fullData.history || []).slice().reverse().map(h => `<div>${h}</div>`).join('');
+        document.getElementById('history-box').innerHTML = (fullData.history || []).slice().reverse().map((h, i) => `<div>${h}</div>`).join('');
+    }
+
+    async function clearHistory() { fullData.history = []; save(true); }
+
+    async function triggerRemoteSpin() {
+        fullData.settings.remoteTrigger = Date.now();
+        save(true);
     }
 
     async function save(silent = false) {
         const s = fullData.settings;
         fullData.options = document.getElementById('opts').value.split('\n').filter(x => x.trim());
         s.startBtnText = document.getElementById('btn-text').value;
+        s.spinTime = parseInt(document.getElementById('spin-time').value);
         s.centerImage = document.getElementById('center-img').value;
-        s.startBtnTop = parseInt(document.getElementById('btn-y').value);
-        s.historyTop = parseInt(document.getElementById('hist-y').value);
-        s.panelOpacity = parseFloat(document.getElementById('p-opacity').value);
         s.autoDelete = document.getElementById('auto-del').checked;
         
-        // Сохраняем шрифты
+        s.panelOpacity = parseFloat(document.getElementById('p-opacity').value);
+        s.panelBlur = parseInt(document.getElementById('p-blur').value);
+        s.startBtnTop = parseInt(document.getElementById('btn-y').value);
+        s.startBtnLeft = parseInt(document.getElementById('btn-x').value);
+        s.historyTop = parseInt(document.getElementById('hist-y').value);
+        s.historyLeft = parseInt(document.getElementById('hist-x').value);
         s.fontWheel = parseInt(document.getElementById('f-wheel').value);
         s.fontBtn = parseInt(document.getElementById('f-btn').value);
-        s.fontHist = parseInt(document.getElementById('f-hist').value);
         
         fullData.password = pass;
 
         const res = await fetch('/api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fullData) });
-        if(res.status === 200) {
-            const t = document.getElementById('toast');
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2000);
-            load();
-        }
+        if(res.status === 200) { if(!silent) notify(); load(); }
     }
-
-    async function triggerRemoteSpin() {
-        fullData.settings.remoteTrigger = Date.now();
-        save(true);
-    }
-    async function clearHistory() { fullData.history = []; save(true); }
-
     if(pass) load();
 </script>
 </body>
