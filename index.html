@@ -19,53 +19,77 @@
         }
         body:not(.idle) #ui-column { opacity: 0; visibility: hidden; }
 
-        /* ЗОЛОТАЯ ПАНЕЛЬ С RGB ОБВОДКОЙ */
+        /* --- ИСПРАВЛЕННЫЙ СТИЛЬ ПАНЕЛЕЙ (RGB ОБВОДКА) --- */
         .premium-panel {
-            position: relative; background: rgba(184, 134, 11, 0.2); backdrop-filter: blur(25px);
-            border-radius: 30px; padding: 4px; display: flex; justify-content: center; align-items: center;
-            overflow: hidden; box-shadow: 0 15px 45px rgba(0,0,0,0.6);
+            position: relative;
+            border-radius: 30px;
+            /* Два фона: верхний (золото) и нижний (радуга) */
+            background: 
+                linear-gradient(135deg, rgba(255, 215, 0, 0.6) 0%, rgba(138, 109, 59, 0.7) 100%) padding-box,
+                conic-gradient(from var(--angle), #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) border-box;
+            border: 5px solid transparent;
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.5);
+            animation: rotateRGB 4s linear infinite;
         }
-        .premium-panel::before {
-            content: ''; position: absolute; width: 150%; height: 150%;
-            background: conic-gradient(#ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff, #ff0000);
-            animation: rotateRGB 4s linear infinite; z-index: -1;
+
+        @keyframes rotateRGB {
+            to { filter: hue-rotate(360deg); }
         }
-        .panel-content {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.7) 0%, rgba(138, 109, 59, 0.7) 100%);
-            width: 100%; height: 100%; border-radius: 26px; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5), 0 0 2px rgba(0,0,0,1);
+
+        /* КНОПКА ЗАПУСКА */
+        .start-plate {
+            width: 500px; min-height: 110px;
+            cursor: pointer; pointer-events: auto; 
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            text-align: center;
         }
-        @keyframes rotateRGB { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .start-plate { width: 500px; height: 120px; cursor: pointer; pointer-events: auto; margin-bottom: 30px; animation: pulseBtn 2.5s infinite ease-in-out; transition: transform 0.2s; }
-        .start-plate:active { transform: scale(0.95); }
-        .start-plate .panel-content { font-size: 50px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; }
+        .start-text {
+            color: #fff;
+            font-size: 50px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.1;
+            /* МЯГКАЯ ОБВОДКА ТЕКСТА */
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8), 0 0 5px rgba(0,0,0,1);
+        }
 
-        #history-container { width: 420px; height: 260px; pointer-events: auto; position: relative; }
-        #history-container::after { content: "ИСТОРИЯ ВЫИГРЫШЕЙ"; position: absolute; top: 15px; font-size: 13px; font-weight: 800; letter-spacing: 4px; color: #fff; text-shadow: 0 0 10px #000; opacity: 0.8; }
-        #history-list { display: flex; flex-direction: column; align-items: center; padding-top: 45px; width: 100%; }
-        .history-item { color: #fff; font-size: 18px; font-weight: 800; padding: 8px 0; width: 100%; text-align: center; }
+        /* КОНТЕЙНЕР ИСТОРИИ */
+        #history-container {
+            width: 420px; height: 260px; 
+            pointer-events: auto;
+            position: relative;
+        }
+        #history-title {
+            font-size: 13px; font-weight: 800; letter-spacing: 4px; color: #fff;
+            margin-top: 15px; opacity: 0.8;
+            text-shadow: 0 0 5px #000;
+        }
+        #history-list { display: flex; flex-direction: column; align-items: center; width: 100%; overflow: hidden; }
+        .history-item { 
+            color: #fff; font-size: 18px; font-weight: 800; padding: 6px 0; width: 100%; text-align: center;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        }
 
-        @keyframes pulseBtn { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
-
-        /* ПОБЕДНАЯ ПЛАШКА (КОМПАКТНАЯ) */
+        /* ПОБЕДНАЯ ПЛАШКА */
         #winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 600; cursor: pointer; opacity: 0; visibility: hidden; transition: 0.8s; }
         body.winner-active #winner-overlay { opacity: 1; visibility: visible; }
         .winner-plate { 
             background: linear-gradient(145deg, #1a1a1a, #000); 
-            padding: 40px 50px; border-radius: 50px; border: 3px solid #ffd700; 
+            padding: 40px 50px; border-radius: 60px; border: 3px solid #ffd700; 
             text-align: center; backdrop-filter: blur(40px); box-shadow: 0 0 100px rgba(0,0,0,1); 
-            width: 520px; /* Фиксируем ширину под размер колеса */
-            box-sizing: border-box;
+            width: 520px; box-sizing: border-box;
         }
         #winner-flavor { color: #ffd700; font-size: 20px; font-weight: 800; letter-spacing: 8px; margin-bottom: 15px; display: block; text-transform: uppercase; }
-        #winner-name { 
-            color: #fff; font-weight: 900; margin: 0; 
-            text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.1; 
-            text-transform: uppercase; 
-            word-wrap: break-word; overflow-wrap: break-word; /* Перенос слов */
-        }
+        #winner-name { color: #fff; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.1; text-transform: uppercase; word-wrap: break-word; }
 
         /* КОЛЕСО */
         #wheel-wrapper { position: relative; width: 620px; height: 620px; filter: drop-shadow(0 20px 60px rgba(0,0,0,0.7)); }
@@ -80,10 +104,11 @@
 
 <div id="ui-column">
     <div class="start-plate premium-panel" onclick="startSpin()">
-        <div class="panel-content">Да-да, Нет-нет</div>
+        <div class="start-text">Да-да, Нет-нет</div>
     </div>
     <div id="history-container" class="premium-panel">
-        <div class="panel-content"><div id="history-list"></div></div>
+        <div id="history-title">ИСТОРИЯ ВЫИГРЫШЕЙ</div>
+        <div id="history-list"></div>
     </div>
 </div>
 
@@ -106,6 +131,8 @@
     </div>
 </div>
 
+<script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+
 <script>
     let options = [], history = [], settings = {}, lastUpdate = 0;
     let angle = 0, spinning = false, lastTickIdx = -1, arrowAngle = 0;
@@ -122,7 +149,7 @@
             if (data.lastUpdate > lastUpdate) {
                 options = data.options; history = data.history || []; settings = data.settings;
                 lastUpdate = data.lastUpdate;
-                document.querySelector('.start-plate .panel-content').innerText = settings.startBtnText || "Да-да, Нет-нет";
+                document.querySelector('.start-text').innerText = settings.startBtnText || "Да-да, Нет-нет";
                 document.getElementById('center-img').src = settings.centerImage;
                 updateHistoryUI(); draw();
             }
@@ -212,21 +239,16 @@
             const colors = ['#FFD700', '#D4AF37', '#FFDF00'];
             (function frame() { confetti({ particleCount: 12, origin: { x: Math.random(), y: -0.2 }, colors, shapes: ['circle'], gravity: 1.2, scalar: 2 }); if (Date.now() < end) requestAnimationFrame(frame); }());
         } else if (winner !== "Ничего") { confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } }); }
-        
         let flavor = "ВЫИГРЫШ!";
         for (let [p, t] of Object.entries(settings.flavorTexts || {})) { if (winner.includes(p)) flavor = t; }
         document.getElementById('winner-flavor').innerText = flavor;
-        
         const nameEl = document.getElementById('winner-name');
         nameEl.innerText = winner;
-
-        // --- УМНЫЙ ПОДБОР ШРИФТА ДЛЯ ПЛАШКИ ---
         let baseSize = 48;
         if (winner.length > 35) baseSize = 20;
         else if (winner.length > 25) baseSize = 26;
         else if (winner.length > 15) baseSize = 36;
         nameEl.style.fontSize = baseSize + "px";
-
         document.body.classList.add('winner-active');
         history.push(winner);
         const pass = localStorage.getItem('spin_pass') || "VikaWheel2024";
