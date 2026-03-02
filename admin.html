@@ -2,104 +2,103 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Wheel Ultra Admin</title>
+    <title>Wheel Master Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Montserrat:wght@900&family=Bebas+Neue&family=Pacifico&family=Playfair+Display:wght@900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background: #080808; color: #eee; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1100px; width: 100%; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; max-width: 1200px; width: 100%; }
         .card { background: #121212; padding: 20px; border-radius: 20px; border: 1px solid #222; }
-        h3 { color: #ffd700; text-transform: uppercase; font-size: 13px; letter-spacing: 2px; border-bottom: 1px solid #222; padding-bottom: 10px; margin-top: 0; }
+        h3 { color: #ffd700; text-transform: uppercase; font-size: 12px; letter-spacing: 2px; border-bottom: 1px solid #222; padding-bottom: 10px; margin-top: 0; }
         label { display: block; margin: 10px 0 5px; font-size: 10px; color: #666; font-weight: 800; text-transform: uppercase; }
         textarea, input, select { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
-        .spin-btn { background: #ff4757; color: #fff; font-size: 22px; height: 100px; margin-bottom: 20px; border: none; border-radius: 15px; cursor: pointer; width: 100%; font-weight: 900; box-shadow: 0 10px 30px rgba(255, 71, 87, 0.3); }
+        .spin-btn { background: #ff4757; color: #fff; font-size: 18px; height: 60px; margin-bottom: 20px; border: none; border-radius: 12px; cursor: pointer; width: 100%; font-weight: 900; }
         .save-btn { background: #ffd700; color: #000; width: 100%; margin-top: 20px; font-weight: 900; border: none; padding: 15px; border-radius: 10px; cursor: pointer; }
-        .flavor-row { display: flex; gap: 5px; margin-bottom: 5px; }
-        
-        /* КРАСИВОЕ УВЕДОМЛЕНИЕ */
-        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 15px 40px; border-radius: 50px; font-weight: 900; transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 15px 40px; border-radius: 50px; font-weight: 900; transition: 0.5s; z-index: 1000; }
         #toast.show { top: 30px; }
-
-        .slider-group { display: flex; align-items: center; gap: 10px; }
-        .slider-group span { min-width: 30px; font-size: 12px; color: #ffd700; }
+        .color-preview { height: 40px; border-radius: 8px; margin-top: 5px; border: 1px solid #333; }
     </style>
 </head>
 <body>
-    <div id="toast">ОБНОВЛЕНО!</div>
-
+    <div id="toast">ДИЗАЙН ОБНОВЛЕН!</div>
     <div id="login" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#080808;z-index:200;display:flex;justify-content:center;align-items:center;">
         <div class="card" style="width:300px; text-align:center;">
-            <h3>DASHBOARD ACCESS</h3>
+            <h3>Security Access</h3>
             <input type="password" id="pass" placeholder="Пароль...">
             <button class="save-btn" onclick="load()">ВОЙТИ</button>
         </div>
     </div>
 
     <div class="grid" id="main-ui" style="display:none;">
+        <!-- КОЛОНКА 1: МЕХАНИКА -->
         <div class="card">
-            <button class="spin-btn" onclick="triggerRemoteSpin()">КРУТИТЬ КОЛЕСО</button>
-            
-            <h3>🎨 Дизайн Панелей</h3>
-            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label>Прозрачность (0-1)</label>
-                    <input type="number" id="p-opacity" step="0.1" min="0" max="1">
-                </div>
-                <div>
-                    <label>Размытие (px)</label>
-                    <input type="number" id="p-blur">
-                </div>
-            </div>
-
-            <h3>📍 Позиции (Отступы)</h3>
-            <label>Кнопка (Сверху / Слева %)</label>
-            <div class="flavor-row">
-                <input type="number" id="btn-y" placeholder="Y">
-                <input type="number" id="btn-x" placeholder="X %">
-            </div>
-            <label>История (Сверху / Слева %)</label>
-            <div class="flavor-row">
-                <input type="number" id="hist-y" placeholder="Y">
-                <input type="number" id="hist-x" placeholder="X %">
-            </div>
-
-            <h3>✏️ Шрифты</h3>
-            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div><label>Колесо (px)</label><input type="number" id="f-wheel"></div>
-                <div><label>Кнопка (px)</label><input type="number" id="f-btn"></div>
-            </div>
-            
-            <button class="save-btn" onclick="save()">ПРИМЕНИТЬ ДИЗАЙН</button>
-        </div>
-
-        <div class="card">
-            <h3>📝 Варианты</h3>
-            <textarea id="opts" style="height:120px;"></textarea>
-            
+            <button class="spin-btn" onclick="triggerRemoteSpin()">🚀 КРУТИТЬ (REMOTE)</button>
+            <h3>📝 Контент</h3>
+            <textarea id="opts" style="height:150px;"></textarea>
             <label>Текст кнопки:</label>
             <input type="text" id="btn-text">
-
             <label>Время вращения (мс):</label>
             <input type="number" id="spin-time">
-
-            <label>URL гифки центра:</label>
-            <input type="text" id="center-img">
-
             <label><input type="checkbox" id="auto-del"> Удалять при выигрыше</label>
+        </div>
 
-            <h3>📜 История</h3>
+        <!-- КОЛОНКА 2: ТИПОГРАФИКА И СТРЕЛКА -->
+        <div class="card">
+            <h3>🏹 Настройка Стрелки</h3>
+            <label>Форма стрелки:</label>
+            <select id="arrow-type">
+                <option value="classic">Классическая</option>
+                <option value="drop">Капля</option>
+                <option value="sharp">Острая</option>
+            </select>
+            <label>Цвет стрелки:</label>
+            <input type="color" id="arrow-color">
+
+            <h3 style="margin-top:20px;">✏️ Шрифты</h3>
+            <label>Шрифт Колеса:</label>
+            <select id="f-wheel-fam">
+                <option value="Inter">Inter</option>
+                <option value="Montserrat">Montserrat</option>
+                <option value="Bebas Neue">Bebas Neue</option>
+                <option value="Pacifico">Pacifico</option>
+                <option value="Playfair Display">Playfair Display</option>
+            </select>
+            <input type="number" id="f-wheel-size" placeholder="Размер">
+
+            <label>Шрифт Кнопки:</label>
+            <select id="f-btn-fam">
+                <option value="Inter">Inter</option>
+                <option value="Montserrat">Montserrat</option>
+                <option value="Bebas Neue">Bebas Neue</option>
+                <option value="Pacifico">Pacifico</option>
+            </select>
+            <input type="number" id="f-btn-size" placeholder="Размер">
+        </div>
+
+        <!-- КОЛОНКА 3: ДИЗАЙН ПАНЕЛЕЙ -->
+        <div class="card">
+            <h3>🎨 Дизайн Панелей</h3>
+            <label>Прозрачность (0.1 - 1.0):</label>
+            <input type="number" id="p-opacity" step="0.1">
+            <label>Размытие (blur):</label>
+            <input type="number" id="p-blur">
+            
+            <label>Шрифт Истории:</label>
+            <select id="f-hist-fam">
+                <option value="Inter">Inter</option>
+                <option value="Montserrat">Montserrat</option>
+            </select>
+            <input type="number" id="f-hist-size">
+
+            <h3 style="margin-top:20px;">📜 История</h3>
             <div id="history-box" style="max-height:100px; overflow-y:auto; font-size:11px; background:#000; padding:10px; border-radius:10px;"></div>
-            <button style="background:#222; color:#777; font-size:9px;" onclick="clearHistory()">Очистить историю</button>
+            
+            <button class="save-btn" onclick="save()">ПРИМЕНИТЬ ВСЁ</button>
         </div>
     </div>
 
 <script>
     let fullData = {};
     let pass = localStorage.getItem('spin_pass') || "";
-
-    function notify() {
-        const t = document.getElementById('toast');
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 2000);
-    }
 
     async function load() {
         const p = document.getElementById('pass').value || pass;
@@ -117,56 +116,56 @@
         const s = fullData.settings;
         document.getElementById('opts').value = fullData.options.join('\n');
         document.getElementById('btn-text').value = s.startBtnText;
-        document.getElementById('center-img').value = s.centerImage;
         document.getElementById('spin-time').value = s.spinTime;
         document.getElementById('auto-del').checked = s.autoDelete;
+        document.getElementById('center-img').value = s.centerImage || "";
+        
+        document.getElementById('arrow-type').value = s.arrowType;
+        document.getElementById('arrow-color').value = s.arrowColor;
+        
+        document.getElementById('f-wheel-fam').value = s.fontWheelFamily;
+        document.getElementById('f-wheel-size').value = s.fontWheel;
+        document.getElementById('f-btn-fam').value = s.fontBtnFamily;
+        document.getElementById('f-btn-size').value = s.fontBtn;
+        document.getElementById('f-hist-fam').value = s.fontHistFamily;
+        document.getElementById('f-hist-size').value = s.fontHist;
         
         document.getElementById('p-opacity').value = s.panelOpacity;
         document.getElementById('p-blur').value = s.panelBlur;
-        document.getElementById('btn-y').value = s.startBtnTop;
-        document.getElementById('btn-x').value = s.startBtnLeft;
-        document.getElementById('hist-y').value = s.historyTop;
-        document.getElementById('hist-x').value = s.historyLeft;
-        document.getElementById('f-wheel').value = s.fontWheel;
-        document.getElementById('f-btn').value = s.fontBtn;
 
-        renderHistory();
+        document.getElementById('history-box').innerHTML = (fullData.history || []).slice().reverse().map(h => `<div>${h}</div>`).join('');
     }
 
-    function renderHistory() {
-        document.getElementById('history-box').innerHTML = (fullData.history || []).slice().reverse().map((h, i) => `<div>${h}</div>`).join('');
-    }
-
-    async function clearHistory() { fullData.history = []; save(true); }
-
-    async function triggerRemoteSpin() {
-        fullData.settings.remoteTrigger = Date.now();
-        save(true);
-    }
-
-    async function save(silent = false) {
+    async function save() {
         const s = fullData.settings;
         fullData.options = document.getElementById('opts').value.split('\n').filter(x => x.trim());
         s.startBtnText = document.getElementById('btn-text').value;
         s.spinTime = parseInt(document.getElementById('spin-time').value);
-        s.centerImage = document.getElementById('center-img').value;
         s.autoDelete = document.getElementById('auto-del').checked;
+        
+        s.arrowType = document.getElementById('arrow-type').value;
+        s.arrowColor = document.getElementById('arrow-color').value;
+        
+        s.fontWheelFamily = document.getElementById('f-wheel-fam').value;
+        s.fontWheel = parseInt(document.getElementById('f-wheel-size').value);
+        s.fontBtnFamily = document.getElementById('f-btn-fam').value;
+        s.fontBtn = parseInt(document.getElementById('f-btn-size').value);
+        s.fontHistFamily = document.getElementById('f-hist-fam').value;
+        s.fontHist = parseInt(document.getElementById('f-hist-size').value);
         
         s.panelOpacity = parseFloat(document.getElementById('p-opacity').value);
         s.panelBlur = parseInt(document.getElementById('p-blur').value);
-        s.startBtnTop = parseInt(document.getElementById('btn-y').value);
-        s.startBtnLeft = parseInt(document.getElementById('btn-x').value);
-        s.historyTop = parseInt(document.getElementById('hist-y').value);
-        s.historyLeft = parseInt(document.getElementById('hist-x').value);
-        s.fontWheel = parseInt(document.getElementById('f-wheel').value);
-        s.fontBtn = parseInt(document.getElementById('f-btn').value);
-        
-        fullData.password = pass;
 
+        fullData.password = pass;
         const res = await fetch('/api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fullData) });
-        if(res.status === 200) { if(!silent) notify(); load(); }
+        if(res.status === 200) { 
+            const t = document.getElementById('toast'); t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+            load(); 
+        }
     }
-    if(pass) load();
+
+    async function triggerRemoteSpin() { fullData.settings.remoteTrigger = Date.now(); save(); }
 </script>
 </body>
 </html>
