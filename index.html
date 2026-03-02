@@ -68,4 +68,86 @@
             arrowEl.innerHTML = `<path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="#fff" stroke="#000" stroke-width="2"/>`;
             if (s.remoteTrigger > lastRemote && lastRemote !== 0) startSpin();
             lastRemote = s.remoteTrigger;
-            const hList = 
+            const hList = document.getElementById('history-list');
+            hList.innerHTML = options.map(o => `<div class="list-item" style="font-size:${s.fontHist}px">${o}</div>`).join('') + options.map(o => `<div class="list-item" style="font-size:${s.fontHist}px">${o}</div>`).join('');
+            draw();
+        }
+    }
+    function draw() {
+        if (!options.length) return;
+        const arc = (2 * Math.PI) / options.length;
+        ctx.clearRect(0, 0, 620, 620); ctx.save(); ctx.translate(310, 310);
+        options.forEach((text, i) => {
+            const startAngle = angle + i * arc;
+            ctx.fillStyle = `hsl(${(i * 360) / options.length}, 75%, 50%)`;
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 300, startAngle, startAngle + arc); ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 4; ctx.stroke();
+            ctx.save(); ctx.rotate(startAngle + arc / 2);
+            ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,0.7)'; ctx.lineWidth = 2.5;
+            ctx.font = `900 ${settings.fontWheel}px Inter`; ctx.textAlign = "center";
+            let d = text.toUpperCase();
+            if (ctx.measureText(d).width > 150) { while(ctx.measureText(d+"...").width > 150) d = d.slice(0, -1); d += "..."; }
+            ctx.strokeText(d, 180, 5); ctx.fillStyle = "#fff"; ctx.fillText(d, 180, 5);
+            ctx.restore();
+        });
+        ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 24; ctx.beginPath(); ctx.arc(0, 0, 290, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 298, 0, Math.PI * 2); ctx.stroke();
+        ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(0, 0, 62, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
+    function mainLoop() {
+        if (!spinning) { angle += 0.003; draw(); }
+        arrowAngle += (-Math.min((spinning?0.05:0.003)*1300, 35) - arrowAngle) * 0.2;
+        if (Math.abs(arrowAngle) < 0.1) arrowAngle = 0;
+        arrowEl.style.transform = `rotate(${arrowAngle}deg)`;
+        requestAnimationFrame(mainLoop);
+    }
+    function startSpin() {
+        if (spinning || !options.length) return;
+        if (settings.spinSound) { spinAudio.src = settings.spinSound; spinAudio.volume = 0.5; spinAudio.play().then(() => { spinAudio.pause(); spinAudio.currentTime = 0; }); }
+        document.body.classList.remove('idle', 'winner-active');
+        setTimeout(spin, 800);
+    }
+    function spin() {
+        spinning = true;
+        if (spinAudio.src) spinAudio.play().catch(()=>{});
+        const start = performance.now(), duration = settings.spinTime || 12000, startAngle = angle;
+        const totalRotation = (Math.PI * 50) + (Math.random() * Math.PI * 20);
+        function update(now) {
+            const t = Math.min((now - start) / duration, 1);
+            angle = startAngle + totalRotation * (1 - Math.pow(1 - t, 5));
+            const arc = (2 * Math.PI) / options.length;
+            const idx = Math.floor(((angle + Math.PI * 1.5) % (Math.PI * 2)) / arc);
+            if (idx !== lastTick) { tickSound.currentTime = 0; tickSound.play().catch(()=>{}); lastTick = idx; }
+            draw(); if (t < 1) requestAnimationFrame(update);
+            else { spinning = false; arrowAngle = 0; arrowEl.style.transform = `rotate(0deg)`; if (spinAudio) { let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50); } finish(); }
+        }
+        requestAnimationFrame(update);
+    }
+    async function finish() {
+        const arc = (2 * Math.PI) / options.length;
+        const normalized = (Math.PI * 1.5 - angle) % (Math.PI * 2);
+        const idx = Math.floor((normalized < 0 ? normalized + Math.PI * 2 : normalized) / arc);
+        const winner = options[idx];
+        if (winner.includes("Джекпот")) {
+            const end = Date.now() + 5000;
+            (function frame() { confetti({ particleCount: 12, origin: { x: Math.random(), y: -0.2 }, colors: ['#ffd700'], shapes: ['circle'], gravity: 1.2, scalar: 2 }); if (Date.now() < end) requestAnimationFrame(frame); }());
+        } else if (!winner.includes("Ничего")) { confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } }); }
+        let flavor = "ВЫИГРЫШ!";
+        for (let [p, t] of Object.entries(settings.flavorTexts || {})) { if (winner.includes(p)) flavor = t; }
+        document.getElementById('winner-flavor').innerText = flavor;
+        document.getElementById('winner-name').innerText = winner;
+        let bs = 48; if (winner.length > 35) bs = 20; else if (winner.length > 25) bs = 28; else if (winner.length > 15) bs = 36;
+        document.getElementById('winner-name').style.fontSize = bs + "px";
+        document.body.classList.add('winner-active');
+        history.push(winner);
+        if (settings.autoDelete) options.splice(idx, 1);
+        const pass = localStorage.getItem('spin_pass') || "VikaWheel2024";
+        await fetch('/api/data', { method: 'POST', body: JSON.stringify({ options, history, settings, password: pass }) });
+        setTimeout(resetToIdle, 15000);
+    }
+    function resetToIdle() { if (spinning) return; document.body.classList.remove('winner-active'); setTimeout(() => { if (!spinning) document.body.classList.add('idle'); }, 1000); }
+    setInterval(sync, 2000); sync(); requestAnimationFrame(mainLoop);
+</script>
+</body>
+</html>
