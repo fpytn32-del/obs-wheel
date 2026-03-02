@@ -21,69 +21,51 @@
 
         /* ЗОЛОТАЯ ПАНЕЛЬ С RGB ОБВОДКОЙ */
         .premium-panel {
-            position: relative;
-            background: rgba(184, 134, 11, 0.2);
-            backdrop-filter: blur(25px);
-            border-radius: 30px;
-            padding: 4px; /* Толщина RGB обводки */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.6);
+            position: relative; background: rgba(184, 134, 11, 0.2); backdrop-filter: blur(25px);
+            border-radius: 30px; padding: 4px; display: flex; justify-content: center; align-items: center;
+            overflow: hidden; box-shadow: 0 15px 45px rgba(0,0,0,0.6);
         }
-
         .premium-panel::before {
-            content: '';
-            position: absolute;
-            width: 150%; height: 150%;
+            content: ''; position: absolute; width: 150%; height: 150%;
             background: conic-gradient(#ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff, #ff0000);
-            animation: rotateRGB 4s linear infinite;
-            z-index: -1;
+            animation: rotateRGB 4s linear infinite; z-index: -1;
         }
-
         .panel-content {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.6) 0%, rgba(138, 109, 59, 0.7) 100%);
-            width: 100%; height: 100%;
-            border-radius: 26px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            /* МЯГКИЙ ТЕКСТ */
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.7) 0%, rgba(138, 109, 59, 0.7) 100%);
+            width: 100%; height: 100%; border-radius: 26px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: #fff;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5), 0 0 2px rgba(0,0,0,1);
         }
-
         @keyframes rotateRGB { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .start-plate {
-            width: 500px; height: 120px;
-            cursor: pointer; pointer-events: auto; 
-            margin-bottom: 30px;
-            animation: pulseBtn 2.5s infinite ease-in-out;
-            transition: transform 0.2s;
-        }
+        .start-plate { width: 500px; height: 120px; cursor: pointer; pointer-events: auto; margin-bottom: 30px; animation: pulseBtn 2.5s infinite ease-in-out; transition: transform 0.2s; }
         .start-plate:active { transform: scale(0.95); }
         .start-plate .panel-content { font-size: 50px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; }
 
         #history-container { width: 420px; height: 260px; pointer-events: auto; position: relative; }
-        #history-container::after {
-            content: "ИСТОРИЯ ВЫИГРЫШЕЙ"; position: absolute; top: 15px; 
-            font-size: 13px; font-weight: 800; letter-spacing: 4px; color: #fff;
-            text-shadow: 0 0 10px #000; opacity: 0.8;
-        }
+        #history-container::after { content: "ИСТОРИЯ ВЫИГРЫШЕЙ"; position: absolute; top: 15px; font-size: 13px; font-weight: 800; letter-spacing: 4px; color: #fff; text-shadow: 0 0 10px #000; opacity: 0.8; }
         #history-list { display: flex; flex-direction: column; align-items: center; padding-top: 45px; width: 100%; }
         .history-item { color: #fff; font-size: 18px; font-weight: 800; padding: 8px 0; width: 100%; text-align: center; }
 
         @keyframes pulseBtn { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
-        /* ПОБЕДА */
+        /* ПОБЕДНАЯ ПЛАШКА (КОМПАКТНАЯ) */
         #winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 600; cursor: pointer; opacity: 0; visibility: hidden; transition: 0.8s; }
         body.winner-active #winner-overlay { opacity: 1; visibility: visible; }
-        .winner-plate { background: linear-gradient(145deg, #1a1a1a, #000); padding: 50px 70px; border-radius: 60px; border: 2px solid #ffd700; text-align: center; backdrop-filter: blur(40px); box-shadow: 0 0 100px rgba(0,0,0,1); max-width: 85%; }
-        #winner-flavor { color: #ffd700; font-size: 24px; font-weight: 800; letter-spacing: 10px; margin-bottom: 20px; display: block; text-transform: uppercase; }
-        #winner-name { color: #fff; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.2; text-transform: uppercase; word-wrap: break-word; }
+        .winner-plate { 
+            background: linear-gradient(145deg, #1a1a1a, #000); 
+            padding: 40px 50px; border-radius: 50px; border: 3px solid #ffd700; 
+            text-align: center; backdrop-filter: blur(40px); box-shadow: 0 0 100px rgba(0,0,0,1); 
+            width: 520px; /* Фиксируем ширину под размер колеса */
+            box-sizing: border-box;
+        }
+        #winner-flavor { color: #ffd700; font-size: 20px; font-weight: 800; letter-spacing: 8px; margin-bottom: 15px; display: block; text-transform: uppercase; }
+        #winner-name { 
+            color: #fff; font-weight: 900; margin: 0; 
+            text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.1; 
+            text-transform: uppercase; 
+            word-wrap: break-word; overflow-wrap: break-word; /* Перенос слов */
+        }
 
         /* КОЛЕСО */
         #wheel-wrapper { position: relative; width: 620px; height: 620px; filter: drop-shadow(0 20px 60px rgba(0,0,0,0.7)); }
@@ -126,8 +108,8 @@
 
 <script>
     let options = [], history = [], settings = {}, lastUpdate = 0;
-    let angle = 0, spinning = false, lastTickIdx = -1;
-    let arrowAngle = 0, autoResetTimer = null, spinAudio = new Audio();
+    let angle = 0, spinning = false, lastTickIdx = -1, arrowAngle = 0;
+    let autoResetTimer = null, spinAudio = new Audio();
     const tickSound = new Audio('https://www.soundjay.com/buttons/button-16.mp3');
     const canvas = document.getElementById('wheel'), ctx = canvas.getContext('2d');
     const arrowEl = document.getElementById('arrow');
@@ -182,28 +164,15 @@
     }
 
     function updateArrow(vel) {
-        // Базовый наклон от скорости
         let target = -Math.min(vel * 1400, 35); 
-        
-        // Если скорость падает ниже порога, принудительно тянем стрелку в 0
         let lerpFactor = vel < 0.005 ? 0.25 : 0.15;
-        
         arrowAngle += (target - arrowAngle) * lerpFactor;
-        
-        // Защита от микро-отклонений в конце
         if (Math.abs(arrowAngle) < 0.2) arrowAngle = 0;
-        
         arrowEl.style.transform = `rotate(${arrowAngle}deg)`;
     }
 
     function mainLoop() {
-        if (!spinning) { 
-            let vel = 0.003; 
-            angle += vel; 
-            draw(); 
-            checkTick();
-            updateArrow(vel);
-        }
+        if (!spinning) { let vel = 0.003; angle += vel; draw(); checkTick(); updateArrow(vel); }
         requestAnimationFrame(mainLoop);
     }
 
@@ -221,26 +190,14 @@
         const start = performance.now(), startAngle = angle, duration = settings.spinTime || 12000;
         const totalRotation = (Math.PI * 50) + (Math.random() * Math.PI * 20);
         let prevAngle = startAngle;
-        
         function update(now) {
             const t = Math.min((now - start) / duration, 1);
             let ease = (t < 0.2) ? (t / 0.2) * (t / 0.2) * 0.1 : 0.1 + 0.9 * (1 - Math.pow(1 - (t - 0.2) / 0.8, 5));
             angle = startAngle + totalRotation * ease;
-            const velocity = angle - prevAngle; 
-            prevAngle = angle;
-            
-            checkTick(); 
-            draw(); 
-            updateArrow(velocity);
-
+            const velocity = angle - prevAngle; prevAngle = angle;
+            checkTick(); draw(); updateArrow(velocity);
             if (t < 1) requestAnimationFrame(update);
-            else { 
-                spinning = false; 
-                arrowAngle = 0; // Принудительный сброс
-                arrowEl.style.transform = `rotate(0deg)`;
-                if (spinAudio) { let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50); }
-                finish(); 
-            }
+            else { spinning = false; arrowAngle = 0; arrowEl.style.transform = `rotate(0deg)`; if (spinAudio) { let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50); } finish(); }
         }
         requestAnimationFrame(update);
     }
@@ -259,11 +216,16 @@
         let flavor = "ВЫИГРЫШ!";
         for (let [p, t] of Object.entries(settings.flavorTexts || {})) { if (winner.includes(p)) flavor = t; }
         document.getElementById('winner-flavor').innerText = flavor;
-        document.getElementById('winner-name').innerText = winner;
+        
         const nameEl = document.getElementById('winner-name');
-        if (winner.length > 40) nameEl.style.fontSize = "20px";
-        else if (winner.length > 20) nameEl.style.fontSize = "34px";
-        else nameEl.style.fontSize = "55px";
+        nameEl.innerText = winner;
+
+        // --- УМНЫЙ ПОДБОР ШРИФТА ДЛЯ ПЛАШКИ ---
+        let baseSize = 48;
+        if (winner.length > 35) baseSize = 20;
+        else if (winner.length > 25) baseSize = 26;
+        else if (winner.length > 15) baseSize = 36;
+        nameEl.style.fontSize = baseSize + "px";
 
         document.body.classList.add('winner-active');
         history.push(winner);
