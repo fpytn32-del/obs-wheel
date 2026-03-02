@@ -23,7 +23,7 @@ const server = http.createServer((req, res) => {
             const mime = { '.html': 'text/html', '.mp3': 'audio/mpeg', '.json': 'application/json' };
             res.writeHead(200, { 'Content-Type': mime[ext] || 'text/plain' });
             res.end(fs.readFileSync(fullPath));
-        } else res.end();
+        } else { res.writeHead(404); res.end(); }
 
     } else if (req.method === 'POST' && req.url === '/api/data') {
         let body = '';
@@ -34,15 +34,15 @@ const server = http.createServer((req, res) => {
                 if (incoming.password !== ADMIN_PASSWORD) {
                     res.writeHead(403); return res.end("Wrong Password");
                 }
-                delete incoming.password;
-                incoming.lastUpdate = Date.now();
-                fs.writeFileSync(DATA_FILE, JSON.stringify(incoming, null, 2));
+                // Сохраняем данные, удаляя пароль
+                const dataToSave = { ...incoming };
+                delete dataToSave.password;
+                dataToSave.lastUpdate = Date.now();
+                
+                fs.writeFileSync(DATA_FILE, JSON.stringify(dataToSave, null, 2));
                 res.writeHead(200); res.end(JSON.stringify({ status: 'ok' }));
-            } catch (e) { 
-                console.log(e);
-                res.writeHead(400); res.end("Error"); 
-            }
+            } catch (e) { res.writeHead(400); res.end("Error"); }
         });
     }
 });
-server.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on ${PORT}`));
+server.listen(PORT, '0.0.0.0', () => console.log(`✅ Server running on ${PORT}`));
