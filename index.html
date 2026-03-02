@@ -2,17 +2,18 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Montserrat:wght@900&family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Montserrat:wght@900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; background: transparent; }
+        body { margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Inter', sans-serif; background: transparent; }
         #main-layout { position: relative; transition: 1.2s ease; }
         body.idle #main-layout { filter: blur(10px) brightness(0.3); transform: scale(0.92); }
         body.winner-active #main-layout { filter: brightness(0.1) blur(25px); transform: scale(0.8); }
 
+        /* ЗОЛОТЫЕ ПАНЕЛИ */
         .glass-panel {
             position: fixed; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.7) 0%, rgba(138, 109, 59, 0.8) 100%);
+            background: linear-gradient(135deg, rgba(212, 175, 55, var(--op, 0.7)) 0%, rgba(138, 109, 59, var(--op, 0.8)) 100%);
             backdrop-filter: blur(15px); border: 3px solid #fff; border-radius: 35px;
             box-shadow: 0 15px 45px rgba(0,0,0,0.5); z-index: 500;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -22,46 +23,48 @@
 
         .start-plate { width: 500px; height: 110px; top: 100px; }
         .start-text { 
-            color: #fff; font-family: var(--fbtn-fam, 'Inter'); font-size: var(--fbtn-size, 50px); 
-            font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            color: #fff; font-size: var(--fbtn-size, 50px); font-weight: 900; text-transform: uppercase; 
+            letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.8);
             display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;
         }
 
+        /* ИСТОРИЯ ВЫИГРЫШЕЙ */
         #history-container { width: 340px; height: 200px; top: 260px; overflow: hidden; }
-        #history-title { font-family: 'Inter'; font-size: 11px; font-weight: 900; letter-spacing: 3px; color: #fff; margin-top: 10px; text-shadow: 1px 1px 3px #000; }
-        
+        #history-title { font-size: var(--fhist-title-size, 11px); font-weight: 900; letter-spacing: 3px; color: #fff; margin-top: 10px; text-shadow: 1px 1px 3px #000; }
         #history-viewport { 
             width: 100%; height: 140px; overflow: hidden; position: relative; 
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
         }
+        
+        /* КОНВЕЙЕР: СНИЗУ ВВЕРХ ЧЕРЕЗ ВСЁ ОКНО */
         #history-list { 
             display: flex; flex-direction: column; align-items: center; width: 100%; 
-            position: absolute; bottom: -100%; left: 0; /* Начало снизу */
+            position: absolute; left: 0;
             animation: conveyor-scroll 15s linear infinite; 
         }
         @keyframes conveyor-scroll { 
-            0% { transform: translateY(100%); } 
-            100% { transform: translateY(-100%); } 
+            0% { transform: translateY(140px); } /* Начало за нижней границей */
+            100% { transform: translateY(-100%); } /* Конец за верхней границей */
         }
 
         .history-item { 
-            color: #fff; font-family: var(--fhist-fam, 'Inter'); font-size: var(--fhist-size, 15px); 
-            font-weight: 800; padding: 8px 0; width: 90%; text-align: center; text-transform: uppercase; text-shadow: 1px 1px 4px #000; 
+            color: #fff; font-size: var(--fhist-size, 15px); font-weight: 800; 
+            padding: 8px 0; width: 90%; text-align: center; text-transform: uppercase; text-shadow: 1px 1px 4px #000; 
         }
 
+        /* ПОБЕДА */
         #winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 600; cursor: pointer; opacity: 0; visibility: hidden; transition: 0.8s; }
         body.winner-active #winner-overlay { opacity: 1; visibility: visible; }
         .winner-plate { background: linear-gradient(145deg, #111, #000); padding: 40px 50px; border-radius: 50px; border: 3px solid #ffd700; text-align: center; backdrop-filter: blur(40px); width: 520px; box-sizing: border-box; }
         
-        /* ШРИФТ MONTSERRAT ДЛЯ ВЫИГРЫША */
         #winner-flavor { color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 8px; margin-bottom: 15px; display: block; text-transform: uppercase; }
-        #winner-name { color: #fff; font-family: 'Inter', sans-serif; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.1; text-transform: uppercase; word-wrap: break-word; }
+        #winner-name { color: #fff; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.1; text-transform: uppercase; word-wrap: break-word; }
 
         #wheel-wrapper { position: relative; width: 620px; height: 620px; filter: drop-shadow(0 20px 60px rgba(0,0,0,0.7)); }
         #center-logo-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 112px; height: 112px; border-radius: 50%; border: 6px solid #1a1a1a; z-index: 60; overflow: hidden; background: #000; }
+        #center-img { width: 100%; height: 100%; object-fit: cover; display: block; }
         #arrow-container { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); z-index: 100; width: 50px; height: 70px; }
         #arrow { width: 100%; height: 100%; transform-origin: 50% 10%; will-change: transform; }
-        #center-img { width: 100%; height: 100%; object-fit: cover; }
         canvas { display: block; border-radius: 50%; }
     </style>
 </head>
@@ -91,6 +94,16 @@
     const tickSound = new Audio('https://www.soundjay.com/buttons/button-16.mp3');
     const canvas = document.getElementById('wheel'), ctx = canvas.getContext('2d'), arrowEl = document.getElementById('arrow');
 
+    function parseGifUrl(url) {
+        if (!url) return "";
+        if (url.includes('tenor.com/view/')) {
+            const parts = url.split('-');
+            const id = parts[parts.length - 1];
+            if (id) return `https://media.tenor.com/${id}/tenor.gif`;
+        }
+        return url;
+    }
+
     function getArrowPath(type) {
         if(type === 'drop') return 'M20 60 C40 40 40 0 20 0 C0 0 0 40 20 60 Z';
         if(type === 'sharp') return 'M20 60 L40 0 L20 10 L0 0 Z';
@@ -99,31 +112,37 @@
 
     async function syncData() {
         if (spinning) return;
-        const res = await fetch('/api/data');
-        const data = await res.json();
-        if (data.lastUpdate > lastUpdate) {
-            options = data.options; history = data.history || []; settings = data.settings; lastUpdate = data.lastUpdate;
-            
-            const b = document.body;
-            b.style.setProperty('--fbtn-fam', settings.fontBtnFamily);
-            b.style.setProperty('--fbtn-size', settings.fontBtn + 'px');
-            b.style.setProperty('--fhist-fam', settings.fontHistFamily);
-            b.style.setProperty('--fhist-size', settings.fontHist + 'px');
-            
-            document.querySelector('.start-text').innerText = settings.startBtnText;
-            document.getElementById('center-img').src = settings.centerImage;
-            arrowEl.innerHTML = `<path d="${getArrowPath(settings.arrowType)}" fill="${settings.arrowColor}" stroke="#fff" stroke-width="2"/>`;
+        try {
+            const res = await fetch('/api/data');
+            const data = await res.json();
+            if (data.lastUpdate > lastUpdate) {
+                options = data.options; history = data.history || []; settings = data.settings; lastUpdate = data.lastUpdate;
+                
+                const b = document.body;
+                b.style.setProperty('--fbtn-size', settings.fontBtn + 'px');
+                b.style.setProperty('--fhist-size', settings.fontHist + 'px');
+                b.style.setProperty('--fhist-title-size', (settings.fontHistTitle || 11) + 'px');
+                
+                document.querySelector('.start-text').innerText = settings.startBtnText;
+                document.getElementById('history-title').innerText = settings.historyTitle || "ИСТОРИЯ ВЫИГРЫШЕЙ";
+                
+                const finalImgUrl = parseGifUrl(settings.centerImage);
+                const img = document.getElementById('center-img');
+                if (img.src !== finalImgUrl) img.src = finalImgUrl;
 
-            if (settings.remoteTrigger > lastRemoteTrigger && lastRemoteTrigger !== 0) startSpin();
-            lastRemoteTrigger = settings.remoteTrigger;
-            updateHistoryUI(); draw();
-        }
+                arrowEl.innerHTML = `<path d="${getArrowPath(settings.arrowType)}" fill="${settings.arrowColor}" stroke="#fff" stroke-width="2"/>`;
+
+                if (settings.remoteTrigger > lastRemoteTrigger && lastRemoteTrigger !== 0) startSpin();
+                lastRemoteTrigger = settings.remoteTrigger;
+                updateHistoryUI(); draw();
+            }
+        } catch (e) {}
     }
 
     function updateHistoryUI() {
         const list = document.getElementById('history-list');
         const itemsHTML = (history || []).slice().reverse().map(h => `<div class="history-item">${h}</div>`).join('');
-        list.innerHTML = itemsHTML + itemsHTML; // Дублируем для плавности
+        list.innerHTML = itemsHTML + itemsHTML;
     }
 
     function draw() {
@@ -137,7 +156,7 @@
             ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 4; ctx.stroke();
             ctx.save(); ctx.rotate(angle + i * arc + arc / 2);
             ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 2.5;
-            ctx.font = `900 ${settings.fontWheel}px ${settings.fontWheelFamily}`; ctx.textAlign = "center";
+            ctx.font = `900 ${settings.fontWheel}px Inter`; ctx.textAlign = "center";
             let display = text.toUpperCase();
             if (ctx.measureText(display).width > 150) { while(ctx.measureText(display + "...").width > 150) display = display.slice(0, -1); display += "..."; }
             ctx.strokeText(display, textRadius, 5); ctx.fillStyle = "#fff"; ctx.fillText(display, textRadius, 5);
@@ -191,7 +210,8 @@
         const winner = options[idx];
         if (winner.includes("Джекпот")) {
             const end = Date.now() + 5000;
-            (function frame() { confetti({ particleCount: 12, origin: { x: Math.random(), y: -0.2 }, colors: ['#FFD700'], shapes: ['circle'], gravity: 1.2, scalar: 2 }); if (Date.now() < end) requestAnimationFrame(frame); }());
+            const colors = ['#FFD700', '#D4AF37', '#FFDF00'];
+            (function frame() { confetti({ particleCount: 12, origin: { x: Math.random(), y: -0.2 }, colors, shapes: ['circle'], gravity: 1.2, scalar: 2 }); if (Date.now() < end) requestAnimationFrame(frame); }());
         } else if (!winner.includes("Ничего")) { confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } }); }
         
         let flavor = "ВЫИГРЫШ!";
