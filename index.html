@@ -6,7 +6,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body { margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Inter', sans-serif; background: transparent; }
-        #main-layout { position: relative; transition: 1.2s ease; }
+        #main-layout { position: relative; transition: 1.2s ease; will-change: filter, transform; }
         body.idle #main-layout { filter: blur(10px) brightness(0.3); transform: scale(0.92); }
         body.winner-active #main-layout { filter: brightness(0.1) blur(25px); transform: scale(0.8); }
 
@@ -23,8 +23,7 @@
         .panel-title { width: 90%; font-weight: 900; letter-spacing: 3px; color: #fff; margin-top: 5px; margin-bottom: 5px; text-shadow: 1px 1px 3px #000; overflow: hidden; }
         .viewport { width: 100%; flex: 1; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent); }
         .conveyor-list { display: flex; flex-direction: column; align-items: center; width: 100%; position: absolute; left: 0; animation: conveyor-scroll 15s linear infinite; }
-        
-        @keyframes conveyor-scroll { 0% { transform: translateY(100%); } 100% { transform: translateY(-100%); } }
+        @keyframes conveyor-scroll { 0% { transform: translateY(140px); } 100% { transform: translateY(-100%); } }
 
         .list-item { color: #fff; font-weight: 800; padding: 6px 0; width: 95%; text-align: center; text-transform: uppercase; text-shadow: 1px 1px 4px #000; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
@@ -36,8 +35,8 @@
         #wheel-wrapper { position: relative; width: 620px; height: 620px; filter: drop-shadow(0 20px 60px rgba(0,0,0,0.7)); }
         #center-logo-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 112px; height: 112px; border-radius: 50%; border: 6px solid #1a1a1a; z-index: 60; overflow: hidden; background: #000; }
         #center-img { width: 100%; height: 100%; object-fit: cover; }
-        #dragon-overlay { position: fixed; z-index: 58; pointer-events: none; animation: dragonFloat 4s infinite ease-in-out; }
-        @keyframes dragonFloat { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(0, -15px); } }
+        #dragon-overlay { position: fixed; z-index: 58; pointer-events: none; animation: dragonFloat 4s infinite ease-in-out; transform: translate(-50%, -50%); }
+        @keyframes dragonFloat { 0%, 100% { margin-top: 0; } 50% { margin-top: -15px; } }
         #arrow-container { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); z-index: 100; width: 50px; height: 70px; }
         #arrow { width: 100%; height: 100%; transform-origin: 50% 10%; will-change: transform; }
         canvas { display: block; border-radius: 50%; }
@@ -46,23 +45,12 @@
 <body class="idle">
 
 <div id="ui-column">
-    <div id="start-node" class="glass-panel" onclick="startSpin()"><p class="start-text" id="start-btn-label"></p></div>
-    
-    <div id="history-node" class="glass-panel">
-        <div id="history-title" class="panel-title"></div>
-        <div class="viewport"><div id="history-list" class="conveyor-list"></div></div>
-    </div>
-
-    <div id="prize-list-node" class="glass-panel">
-        <div id="prize-list-title" class="panel-title"></div>
-        <div class="viewport"><div id="prize-full-list" class="conveyor-list"></div></div>
-    </div>
+    <div id="start-node" class="glass-panel" onclick="startSpin()"><p class="start-text" id="start-btn-label" style="margin:0;"></p></div>
+    <div id="history-node" class="glass-panel"><div id="history-title" class="panel-title"></div><div class="viewport"><div id="history-list" class="conveyor-list"></div></div></div>
+    <div id="prize-list-node" class="glass-panel"><div id="prize-list-title" class="panel-title"></div><div class="viewport"><div id="prize-full-list" class="conveyor-list"></div></div></div>
 </div>
 
-<div class="winner-plate" onclick="resetToIdle()">
-    <span id="winner-flavor"></span>
-    <p id="winner-name"></p>
-</div>
+<div class="winner-plate" onclick="resetToIdle()"><span id="winner-flavor"></span><p id="winner-name"></p></div>
 
 <div id="main-layout">
     <div id="dragon-overlay"><img id="dragon-img" src="" style="width:100%; height:100%;"></div>
@@ -83,43 +71,37 @@
 
     async function syncData() {
         if (spinning) return;
-        try {
-            const res = await fetch('/api/data');
-            const data = await res.json();
-            if (data.lastUpdate > lastUpdate) {
-                options = data.options; history = data.history || []; settings = data.settings; lastUpdate = data.lastUpdate;
-                
-                const b = document.body;
-                b.style.setProperty('--op', settings.panelOpacity);
-                b.style.setProperty('--blur', settings.panelBlur);
+        const res = await fetch('/api/data');
+        const data = await res.json();
+        if (data.lastUpdate > lastUpdate) {
+            options = data.options; history = data.history || []; settings = data.settings; lastUpdate = data.lastUpdate;
+            
+            const sNode = document.getElementById('start-node');
+            sNode.style.width = settings.startBtnWidth + "px"; sNode.style.height = settings.startBtnHeight + "px"; sNode.style.top = settings.startBtnTop + "px";
+            const stT = document.getElementById('start-btn-label');
+            stT.innerText = settings.startBtnText; stT.style.fontSize = settings.fontBtn + "px";
 
-                const sNode = document.getElementById('start-node');
-                sNode.style.width = settings.startBtnWidth + "px"; sNode.style.height = settings.startBtnHeight + "px"; sNode.style.top = settings.startBtnTop + "px";
-                const stT = document.getElementById('start-btn-label');
-                stT.innerText = settings.startBtnText; stT.style.fontSize = settings.fontBtn + "px"; stT.style.fontFamily = settings.fontBtnFamily;
+            const hNode = document.getElementById('history-node');
+            hNode.style.width = settings.historyWidth + "px"; hNode.style.height = settings.historyHeight + "px"; hNode.style.top = settings.historyTop + "px";
+            const hT = document.getElementById('history-title');
+            hT.innerText = settings.historyTitle; hT.style.fontSize = settings.fontHistTitle + "px";
 
-                const hNode = document.getElementById('history-node');
-                hNode.style.width = settings.historyWidth + "px"; hNode.style.height = settings.historyHeight + "px"; hNode.style.top = settings.historyTop + "px";
-                const hT = document.getElementById('history-title');
-                hT.innerText = settings.historyTitle; hT.style.fontSize = settings.fontHistTitle + "px";
+            const pNode = document.getElementById('prize-list-node');
+            pNode.style.display = settings.showPrizeList ? 'flex' : 'none';
+            pNode.style.width = settings.prizeListWidth + "px"; pNode.style.height = settings.prizeListHeight + "px"; pNode.style.top = settings.prizeListTop + "px";
+            const pT = document.getElementById('prize-list-title');
+            pT.innerText = settings.prizeListTitle; pT.style.fontSize = settings.fontPrizeTitle + "px";
 
-                const pNode = document.getElementById('prize-list-node');
-                pNode.style.display = settings.showPrizeList ? 'flex' : 'none';
-                pNode.style.width = settings.prizeListWidth + "px"; pNode.style.height = settings.prizeListHeight + "px"; pNode.style.top = settings.prizeListTop + "px";
-                const pT = document.getElementById('prize-list-title');
-                pT.innerText = settings.prizeListTitle; pT.style.fontSize = settings.fontHistTitle + "px";
+            document.getElementById('center-img').src = parseGifUrl(settings.centerImage);
+            const dr = document.getElementById('dragon-overlay');
+            dr.style.left = settings.dragonX + "%"; dr.style.top = settings.dragonY + "%"; dr.style.width = settings.dragonSize + "px";
+            document.getElementById('dragon-img').src = settings.dragonImg;
 
-                document.getElementById('center-img').src = parseGifUrl(settings.centerImage);
-                const dr = document.getElementById('dragon-overlay');
-                dr.style.left = settings.dragonX + "%"; dr.style.top = settings.dragonY + "%"; dr.style.width = settings.dragonSize + "px";
-                document.getElementById('dragon-img').src = settings.dragonImg;
-
-                arrowEl.innerHTML = `<path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="${settings.arrowColor}" stroke="#fff" stroke-width="2"/>`;
-                if (settings.remoteTrigger > lastRemoteTrigger && lastRemoteTrigger !== 0) startSpin();
-                lastRemoteTrigger = settings.remoteTrigger;
-                updateLists(); draw();
-            }
-        } catch (e) {}
+            arrowEl.innerHTML = `<path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="${settings.arrowColor || '#fff'}" stroke="#fff" stroke-width="2"/>`;
+            if (settings.remoteTrigger > lastRemoteTrigger && lastRemoteTrigger !== 0) startSpin();
+            lastRemoteTrigger = settings.remoteTrigger;
+            updateLists(); draw();
+        }
     }
 
     function updateLists() {
@@ -134,11 +116,10 @@
         const arc = (2 * Math.PI) / options.length;
         ctx.clearRect(0, 0, 620, 620); ctx.save(); ctx.translate(310, 310);
         options.forEach((text, i) => {
-            const startAngle = angle + i * arc;
             ctx.fillStyle = `hsl(${(i * 360) / options.length}, 55%, 40%)`;
-            ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 300, startAngle, startAngle + arc); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 300, angle + i * arc, angle + (i + 1) * arc); ctx.fill();
             ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 4; ctx.stroke();
-            ctx.save(); ctx.rotate(startAngle + arc / 2);
+            ctx.save(); ctx.rotate(angle + i * arc + arc / 2);
             ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 2.5;
             ctx.font = `900 ${settings.fontWheel}px Inter`; ctx.textAlign = "center";
             let display = text.toUpperCase();
@@ -205,6 +186,7 @@
         let bs = 48; if (winner.length > 35) bs = 20; else if (winner.length > 25) bs = 26; else if (winner.length > 15) bs = 34;
         document.getElementById('winner-name').style.fontSize = bs + "px";
         document.body.classList.add('winner-active');
+        
         history.push(winner);
         if (settings.autoDelete) options.splice(idx, 1);
         const pass = localStorage.getItem('spin_pass') || "VikaWheel2024";
