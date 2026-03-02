@@ -22,7 +22,7 @@
     <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#080808; z-index:2000; display:flex; justify-content:center; align-items:center;">
         <div class="card" style="width:300px; text-align:center;">
             <h3>Security Access</h3>
-            <input type="password" id="pass-input" placeholder="Пароль...">
+            <input type="password" id="pass-input" placeholder="Введите пароль...">
             <button onclick="tryLogin()">ВОЙТИ</button>
         </div>
     </div>
@@ -34,6 +34,7 @@
             <label>Текст кнопки:</label><input type="text" id="btn-text">
             <label>Заголовок призов:</label><input type="text" id="hist-title">
             <label>Время вращения (мс):</label><input type="number" id="spin-time">
+            <label>Скорость конвейера (сек):</label><input type="number" id="conv-speed">
             <label><input type="checkbox" id="auto-del"> Удалять при выигрыше</label>
         </div>
         <div class="card">
@@ -78,6 +79,7 @@
         document.getElementById('btn-text').value = s.startBtnText || "Да-да, Нет-нет";
         document.getElementById('hist-title').value = s.historyTitle || "ПРИЗЫ";
         document.getElementById('spin-time').value = s.spinTime || 12000;
+        document.getElementById('conv-speed').value = s.conveyorSpeed || 15;
         document.getElementById('auto-del').checked = s.autoDelete || false;
         document.getElementById('center-img').value = s.centerImage || "";
         document.getElementById('btn-w').value = s.startBtnWidth || 500;
@@ -102,6 +104,7 @@
         s.startBtnText = document.getElementById('btn-text').value;
         s.historyTitle = document.getElementById('hist-title').value;
         s.spinTime = parseInt(document.getElementById('spin-time').value);
+        s.conveyorSpeed = parseInt(document.getElementById('conv-speed').value);
         s.centerImage = document.getElementById('center-img').value;
         s.autoDelete = document.getElementById('auto-del').checked;
         s.startBtnWidth = parseInt(document.getElementById('btn-w').value);
@@ -116,8 +119,7 @@
         s.fontBtn = parseInt(document.getElementById('f-btn').value);
         s.fontHist = parseInt(document.getElementById('f-hist').value);
         s.fontHistTitle = parseInt(document.getElementById('f-hist-t').value);
-        const f = {}; 
-        document.querySelectorAll('.flavor-row').forEach(r => { 
+        const f = {}; document.querySelectorAll('.flavor-row').forEach(r => { 
             const pEl = r.querySelector('.f-p'); const tEl = r.querySelector('.f-t');
             if(pEl && tEl && pEl.value) f[pEl.value] = tEl.value;
         });
