@@ -11,73 +11,33 @@
         body.idle #main-layout { filter: blur(10px) brightness(0.3); transform: scale(0.92); }
         body.winner-active #main-layout { filter: brightness(0.1) blur(25px); transform: scale(0.8); }
 
-        /* --- ЗОЛОТЫЕ ПАНЕЛИ С БЕЛОЙ ОБВОДКОЙ --- */
         .glass-panel {
-            position: fixed; 
-            left: 50%;
-            transform: translateX(-50%); /* Центровка по горизонтали */
+            position: fixed; left: 50%; transform: translateX(-50%);
             background: linear-gradient(135deg, rgba(212, 175, 55, var(--op, 0.7)) 0%, rgba(138, 109, 59, var(--op, 0.8)) 100%);
-            backdrop-filter: blur(calc(var(--blur, 15) * 1px)); 
-            border: 3px solid #fff; /* БЕЛАЯ ОБВОДКА */
-            border-radius: 35px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.5); 
-            z-index: 500;
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
+            backdrop-filter: blur(15px); border: 3px solid #fff; border-radius: 35px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.5); z-index: 500;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: top 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
-            box-sizing: border-box;
-            text-align: center;
         }
-
-        /* Прячем панели, когда колесо крутится */
         body:not(.idle) .glass-panel { opacity: 0; visibility: hidden; }
 
         /* КНОПКА ЗАПУСКА */
         .start-plate { width: 550px; height: 130px; cursor: pointer; pointer-events: auto; }
-        
         .start-text { 
-            color: #fff; 
-            font-size: var(--fbtn, 50px); 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            /* МЯГКАЯ ТЕНЬ ТЕКСТА */
-            text-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 5px rgba(0,0,0,1);
-            line-height: 1;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
+            color: #fff; font-size: var(--fbtn, 50px); font-weight: 900; text-transform: uppercase; 
+            letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 5px rgba(0,0,0,1);
+            display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;
         }
 
         /* ИСТОРИЯ ВЫИГРЫШЕЙ */
         #history-container { width: 360px; height: 220px; pointer-events: auto; }
-        #history-title { 
-            font-size: 11px; font-weight: 900; letter-spacing: 3px; color: #fff; 
-            margin-top: 15px; margin-bottom: 5px; text-shadow: 1px 1px 3px #000; 
-        }
-        #history-viewport { 
-            width: 100%; height: 150px; overflow: hidden; position: relative; 
-            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-        }
-        #history-list { 
-            display: flex; flex-direction: column; align-items: center; 
-            width: 100%; position: absolute; top: 0; left: 0; 
-            animation: conveyor-scroll 15s linear infinite; 
-        }
+        #history-title { font-size: 11px; font-weight: 900; letter-spacing: 3px; color: #fff; margin-top: 15px; margin-bottom: 5px; text-shadow: 1px 1px 3px #000; }
+        #history-viewport { width: 100%; height: 150px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent); }
+        #history-list { display: flex; flex-direction: column; align-items: center; width: 100%; position: absolute; top: 0; left: 0; animation: conveyor-scroll 15s linear infinite; }
         @keyframes conveyor-scroll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
-        .history-item { 
-            color: #fff; font-size: 16px; font-weight: 800; padding: 10px 0; 
-            width: 90%; text-align: center; text-transform: uppercase; 
-            text-shadow: 1px 1px 4px #000; border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
+        .history-item { color: #fff; font-weight: 800; padding: 10px 0; width: 90%; text-align: center; text-transform: uppercase; text-shadow: 1px 1px 4px #000; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* ПОБЕДНАЯ ПЛАШКА */
+        /* ПОБЕДА */
         #winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 600; cursor: pointer; opacity: 0; visibility: hidden; transition: 0.8s; }
         body.winner-active #winner-overlay { opacity: 1; visibility: visible; }
         .winner-plate { background: linear-gradient(145deg, #111, #000); padding: 40px 50px; border-radius: 50px; border: 3px solid #ffd700; text-align: center; backdrop-filter: blur(40px); width: 520px; box-sizing: border-box; box-shadow: 0 0 100px #000; }
@@ -96,35 +56,19 @@
 <body class="idle">
 
 <div id="ui-column">
-    <!-- Кнопка -->
-    <div id="start-node" class="start-plate glass-panel" onclick="startSpin()">
-        <p class="start-text">Да-да, Нет-нет</p>
-    </div>
-    
-    <!-- История -->
+    <div id="start-node" class="start-plate glass-panel" onclick="startSpin()"><p class="start-text">Да-да, Нет-нет</p></div>
     <div id="history-node" class="glass-panel" id="history-container">
         <div id="history-title">ИСТОРИЯ ВЫИГРЫШЕЙ</div>
-        <div id="history-viewport">
-            <div id="history-list"></div>
-        </div>
+        <div id="history-viewport"><div id="history-list"></div></div>
     </div>
 </div>
 
-<div id="winner-overlay" onclick="resetToIdle()">
-    <div class="winner-plate">
-        <span id="winner-flavor"></span>
-        <p id="winner-name"></p>
-    </div>
-</div>
+<div id="winner-overlay" onclick="resetToIdle()"><div class="winner-plate"><span id="winner-flavor"></span><p id="winner-name"></p></div></div>
 
 <div id="main-layout">
     <div id="wheel-wrapper">
         <div id="center-logo-container"><img id="center-img" src=""></div>
-        <div id="arrow-container">
-            <svg id="arrow" viewBox="0 0 40 60">
-                <path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="#fff" stroke="#000" stroke-width="2"/>
-            </svg>
-        </div>
+        <div id="arrow-container"><svg id="arrow" viewBox="0 0 40 60"><path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="#fff" stroke="#000" stroke-width="2"/></svg></div>
         <canvas id="wheel" width="620" height="620"></canvas>
     </div>
 </div>
@@ -138,41 +82,29 @@
 
     async function syncData() {
         if (spinning) return;
-        try {
-            const res = await fetch('/api/data');
-            const data = await res.json();
-            if (data.lastUpdate > lastUpdate) {
-                options = data.options; history = data.history || []; settings = data.settings; lastUpdate = data.lastUpdate;
-                
-                // Применяем дизайн
-                const b = document.body;
-                b.style.setProperty('--op', settings.panelOpacity || 0.7);
-                b.style.setProperty('--blur', settings.panelBlur || 15);
-                b.style.setProperty('--fbtn', (settings.fontBtn || 50) + 'px');
-                
-                // Центровка через X %
-                const startNode = document.getElementById('start-node');
-                startNode.style.top = (settings.startBtnTop || 250) + "px";
-                startNode.style.left = (settings.startBtnLeft || 50) + "%";
+        const res = await fetch('/api/data');
+        const data = await res.json();
+        if (data.lastUpdate > lastUpdate) {
+            options = data.options; history = data.history || []; settings = data.settings; lastUpdate = data.lastUpdate;
+            
+            document.body.style.setProperty('--op', settings.panelOpacity);
+            document.body.style.setProperty('--fbtn', settings.fontBtn + 'px');
+            
+            document.getElementById('start-node').style.top = settings.startBtnTop + "px";
+            document.getElementById('history-node').style.top = settings.historyTop + "px";
+            document.querySelector('.start-text').innerText = settings.startBtnText;
+            document.getElementById('center-img').src = settings.centerImage;
 
-                const histNode = document.getElementById('history-node');
-                histNode.style.top = (settings.historyTop || 550) + "px";
-                histNode.style.left = (settings.historyLeft || 50) + "%";
-                
-                document.querySelector('.start-text').innerText = settings.startBtnText;
-                document.getElementById('center-img').src = settings.centerImage;
-
-                if (settings.remoteTrigger > lastRemoteTrigger && lastRemoteTrigger !== 0) startSpin();
-                lastRemoteTrigger = settings.remoteTrigger;
-                updateHistoryUI(); draw();
-            }
-        } catch (e) {}
+            if (settings.remoteTrigger > lastRemoteTrigger && lastRemoteTrigger !== 0) startSpin();
+            lastRemoteTrigger = settings.remoteTrigger;
+            updateHistoryUI(); draw();
+        }
     }
 
     function updateHistoryUI() {
         const list = document.getElementById('history-list');
-        const itemsHTML = (history || []).slice().reverse().map(h => `<div class="history-item" style="font-size:${settings.fontHist || 16}px">${h}</div>`).join('');
-        list.innerHTML = itemsHTML + itemsHTML;
+        const items = (history || []).slice().reverse().map(h => `<div class="history-item" style="font-size:${settings.fontHist}px">${h}</div>`).join('');
+        list.innerHTML = items + items;
     }
 
     function draw() {
@@ -185,7 +117,7 @@
             ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, radius, angle + i * arc, angle + (i + 1) * arc); ctx.fill();
             ctx.save(); ctx.rotate(angle + i * arc + arc / 2);
             ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 2.5;
-            ctx.font = `900 ${settings.fontWheel || 14}px Inter`; ctx.textAlign = "center";
+            ctx.font = `900 ${settings.fontWheel}px Inter`; ctx.textAlign = "center";
             let display = text.toUpperCase();
             if (ctx.measureText(display).width > 150) { while(ctx.measureText(display + "...").width > 150) display = display.slice(0, -1); display += "..."; }
             ctx.strokeText(display, textRadius, 5); ctx.fillStyle = "#fff"; ctx.fillText(display, textRadius, 5);
@@ -197,22 +129,10 @@
         ctx.restore();
     }
 
-    function updateArrow(vel) {
-        let target = -Math.min(vel * 1400, 35); 
-        let lerpFactor = vel < 0.005 ? 0.3 : 0.15;
-        arrowAngle += (target - arrowAngle) * lerpFactor;
-        if (Math.abs(arrowAngle) < 0.1) arrowAngle = 0;
-        arrowEl.style.transform = `rotate(${arrowAngle}deg)`;
-    }
-
     function mainLoop() {
-        if (!spinning) { 
-            let vel = 0.003; angle += vel; draw(); 
-            const arc = (2 * Math.PI) / options.length;
-            const idx = Math.floor(((angle + Math.PI * 1.5) % (Math.PI * 2)) / arc);
-            if (idx !== lastTickIdx) { tickSound.currentTime = 0; tickSound.play().catch(()=>{}); lastTickIdx = idx; }
-            updateArrow(vel);
-        }
+        if (!spinning) { let vel = 0.003; angle += vel; draw(); }
+        arrowAngle += (-Math.min((spinning?0.05:0.003)*1300, 35) - arrowAngle) * 0.2;
+        arrowEl.style.transform = `rotate(${arrowAngle}deg)`;
         requestAnimationFrame(mainLoop);
     }
 
@@ -220,14 +140,13 @@
         if (spinning || !options.length) return;
         if (settings.spinSound) { spinAudio.src = settings.spinSound; spinAudio.volume = 0.5; spinAudio.play().then(() => { spinAudio.pause(); spinAudio.currentTime = 0; }); }
         document.body.classList.remove('idle', 'winner-active');
-        clearTimeout(autoResetTimer);
         setTimeout(spin, 800);
     }
 
     function spin() {
         spinning = true;
         if (spinAudio.src) spinAudio.play().catch(()=>{});
-        const start = performance.now(), startAngle = angle, duration = settings.spinTime || 12000;
+        const start = performance.now(), startAngle = angle, duration = 12000;
         const totalRotation = (Math.PI * 50) + (Math.random() * Math.PI * 20);
         let prevAngle = startAngle;
         function update(now) {
@@ -235,10 +154,7 @@
             let ease = (t < 0.2) ? (t / 0.2) * (t / 0.2) * 0.1 : 0.1 + 0.9 * (1 - Math.pow(1 - (t - 0.2) / 0.8, 5));
             angle = startAngle + totalRotation * ease;
             const velocity = angle - prevAngle; prevAngle = angle;
-            const arc = (2 * Math.PI) / options.length;
-            const idx = Math.floor(((angle + Math.PI * 1.5) % (Math.PI * 2)) / arc);
-            if (idx !== lastTickIdx) { tickSound.currentTime = 0; tickSound.play().catch(()=>{}); lastTickIdx = idx; }
-            draw(); updateArrow(velocity);
+            draw();
             if (t < 1) requestAnimationFrame(update);
             else { spinning = false; arrowAngle = 0; arrowEl.style.transform = `rotate(0deg)`; if (spinAudio) { let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50); } finish(); }
         }
@@ -261,11 +177,9 @@
         document.getElementById('winner-flavor').innerText = flavor;
         document.getElementById('winner-name').innerText = winner;
         const nameEl = document.getElementById('winner-name');
-        let baseSize = 48;
-        if (winner.length > 35) baseSize = 20;
-        else if (winner.length > 25) baseSize = 26;
-        else if (winner.length > 15) baseSize = 36;
-        nameEl.style.fontSize = baseSize + "px";
+        let bs = 48; if (winner.length > 35) bs = 18; else if (winner.length > 25) bs = 24; else if (winner.length > 15) bs = 34;
+        nameEl.style.fontSize = bs + "px";
+
         document.body.classList.add('winner-active');
         history.push(winner);
         if (settings.autoDelete) options.splice(idx, 1);
