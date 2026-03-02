@@ -7,7 +7,7 @@
     <style>
         body { margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Inter', sans-serif; background: transparent; }
         
-        #main-layout { position: relative; transition: filter 1.2s ease, transform 1.2s ease; will-change: filter, transform; }
+        #main-layout { position: relative; transition: filter 1.2s ease, transform 1.2s ease; }
         body.idle #main-layout { filter: blur(10px) brightness(0.3); transform: scale(0.92); }
         body.winner-active #main-layout { filter: brightness(0.1) blur(25px); transform: scale(0.8); }
 
@@ -19,75 +19,79 @@
         }
         body:not(.idle) #ui-column { opacity: 0; visibility: hidden; }
 
-        /* --- ИСПРАВЛЕННЫЙ СТИЛЬ ПАНЕЛЕЙ (RGB ОБВОДКА) --- */
+        /* --- ПРЕМИАЛЬНЫЕ ПАНЕЛИ (ЗОЛОТО + RGB ОБВОДКА) --- */
         .premium-panel {
             position: relative;
+            width: 500px;
+            border-radius: 35px;
+            padding: 5px; /* Толщина RGB рамки */
+            background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+            background-size: 400% 400%;
+            animation: rgb-move 4s linear infinite;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+
+        @keyframes rgb-move {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Внутренняя часть плашки (Плотное Золото) */
+        .panel-inner {
+            background: linear-gradient(135deg, #d4af37 0%, #f1d56e 50%, #8a6d3b 100%);
             border-radius: 30px;
-            /* Два фона: верхний (золото) и нижний (радуга) */
-            background: 
-                linear-gradient(135deg, rgba(255, 215, 0, 0.6) 0%, rgba(138, 109, 59, 0.7) 100%) padding-box,
-                conic-gradient(from var(--angle), #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) border-box;
-            border: 5px solid transparent;
-            backdrop-filter: blur(20px);
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.5);
-            animation: rotateRGB 4s linear infinite;
-        }
-
-        @keyframes rotateRGB {
-            to { filter: hue-rotate(360deg); }
+            box-sizing: border-box;
+            border: 2px solid rgba(255,255,255,0.4); /* Внутренняя золотая каемка */
         }
 
         /* КНОПКА ЗАПУСКА */
-        .start-plate {
-            width: 500px; min-height: 110px;
-            cursor: pointer; pointer-events: auto; 
-            margin-bottom: 30px;
-            padding: 10px 20px;
-            box-sizing: border-box;
-            text-align: center;
-        }
+        .start-plate { height: 120px; cursor: pointer; pointer-events: auto; margin-bottom: 35px; }
+        .start-plate:active { transform: scale(0.96); }
 
         .start-text {
-            color: #fff;
-            font-size: 50px;
-            font-weight: 900;
-            text-transform: uppercase;
+            color: #fff; font-size: 50px; font-weight: 900; text-transform: uppercase;
             letter-spacing: 2px;
-            line-height: 1.1;
             /* МЯГКАЯ ОБВОДКА ТЕКСТА */
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8), 0 0 5px rgba(0,0,0,1);
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8), -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
 
-        /* КОНТЕЙНЕР ИСТОРИИ */
-        #history-container {
-            width: 420px; height: 260px; 
-            pointer-events: auto;
-            position: relative;
-        }
+        /* ИСТОРИЯ ВЫИГРЫШЕЙ (КОНВЕЙЕР) */
+        #history-container { width: 420px; height: 260px; pointer-events: auto; }
+        
         #history-title {
-            font-size: 13px; font-weight: 800; letter-spacing: 4px; color: #fff;
-            margin-top: 15px; opacity: 0.8;
-            text-shadow: 0 0 5px #000;
+            font-size: 13px; font-weight: 900; letter-spacing: 4px; color: #fff;
+            margin-top: 12px; margin-bottom: 5px;
+            text-shadow: 1px 1px 3px #000;
         }
-        #history-list { display: flex; flex-direction: column; align-items: center; width: 100%; overflow: hidden; }
+
+        #history-viewport { width: 100%; height: 180px; overflow: hidden; position: relative; }
+
+        #history-list {
+            display: flex; flex-direction: column; align-items: center;
+            width: 100%; position: absolute; top: 0; left: 0;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
         .history-item { 
-            color: #fff; font-size: 18px; font-weight: 800; padding: 6px 0; width: 100%; text-align: center;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            color: #fff; font-size: 18px; font-weight: 800; 
+            padding: 8px 0; width: 90%; text-align: center;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.8), -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
 
         /* ПОБЕДНАЯ ПЛАШКА */
         #winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 600; cursor: pointer; opacity: 0; visibility: hidden; transition: 0.8s; }
         body.winner-active #winner-overlay { opacity: 1; visibility: visible; }
-        .winner-plate { 
-            background: linear-gradient(145deg, #1a1a1a, #000); 
-            padding: 40px 50px; border-radius: 60px; border: 3px solid #ffd700; 
-            text-align: center; backdrop-filter: blur(40px); box-shadow: 0 0 100px rgba(0,0,0,1); 
-            width: 520px; box-sizing: border-box;
-        }
+        .winner-plate { background: linear-gradient(145deg, #111, #000); padding: 40px 50px; border-radius: 50px; border: 3px solid #ffd700; text-align: center; backdrop-filter: blur(40px); box-shadow: 0 0 100px rgba(0,0,0,1); width: 520px; box-sizing: border-box; }
         #winner-flavor { color: #ffd700; font-size: 20px; font-weight: 800; letter-spacing: 8px; margin-bottom: 15px; display: block; text-transform: uppercase; }
         #winner-name { color: #fff; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.1; text-transform: uppercase; word-wrap: break-word; }
 
@@ -103,12 +107,21 @@
 <body class="idle">
 
 <div id="ui-column">
+    <!-- Кнопка -->
     <div class="start-plate premium-panel" onclick="startSpin()">
-        <div class="start-text">Да-да, Нет-нет</div>
+        <div class="panel-inner">
+            <div class="start-text">Да-да, Нет-нет</div>
+        </div>
     </div>
+    
+    <!-- История -->
     <div id="history-container" class="premium-panel">
-        <div id="history-title">ИСТОРИЯ ВЫИГРЫШЕЙ</div>
-        <div id="history-list"></div>
+        <div class="panel-inner">
+            <div id="history-title">ИСТОРИЯ ВЫИГРЫШЕЙ</div>
+            <div id="history-viewport">
+                <div id="history-list"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -147,17 +160,23 @@
             const res = await fetch('/api/data');
             const data = await res.json();
             if (data.lastUpdate > lastUpdate) {
-                options = data.options; history = data.history || []; settings = data.settings;
+                options = data.options;
+                settings = data.settings;
                 lastUpdate = data.lastUpdate;
                 document.querySelector('.start-text').innerText = settings.startBtnText || "Да-да, Нет-нет";
                 document.getElementById('center-img').src = settings.centerImage;
-                updateHistoryUI(); draw();
+                if (JSON.stringify(history) !== JSON.stringify(data.history)) {
+                    history = data.history || [];
+                    updateHistoryUI();
+                }
+                draw();
             }
         } catch (e) {}
     }
 
     function updateHistoryUI() {
-        document.getElementById('history-list').innerHTML = (history || []).slice(-6).reverse().map(h => `<div class="history-item">${h}</div>`).join('');
+        const list = document.getElementById('history-list');
+        list.innerHTML = (history || []).slice().reverse().map(h => `<div class="history-item">${h}</div>`).join('');
     }
 
     function draw() {
@@ -182,24 +201,22 @@
         ctx.restore();
     }
 
-    function checkTick() {
-        if (!options.length) return;
-        const arc = (2 * Math.PI) / options.length;
-        const currentAngle = (angle + Math.PI * 1.5) % (Math.PI * 2);
-        const idx = Math.floor(currentAngle / arc);
-        if (idx !== lastTickIdx) { tickSound.currentTime = 0; tickSound.play().catch(()=>{}); lastTickIdx = idx; }
-    }
-
     function updateArrow(vel) {
         let target = -Math.min(vel * 1400, 35); 
-        let lerpFactor = vel < 0.005 ? 0.25 : 0.15;
+        let lerpFactor = vel < 0.005 ? 0.3 : 0.15;
         arrowAngle += (target - arrowAngle) * lerpFactor;
-        if (Math.abs(arrowAngle) < 0.2) arrowAngle = 0;
+        if (Math.abs(arrowAngle) < 0.1) arrowAngle = 0;
         arrowEl.style.transform = `rotate(${arrowAngle}deg)`;
     }
 
     function mainLoop() {
-        if (!spinning) { let vel = 0.003; angle += vel; draw(); checkTick(); updateArrow(vel); }
+        if (!spinning) { 
+            let vel = 0.003; angle += vel; draw(); 
+            const arc = (2 * Math.PI) / options.length;
+            const idx = Math.floor(((angle + Math.PI * 1.5) % (Math.PI * 2)) / arc);
+            if (idx !== lastTickIdx) { tickSound.currentTime = 0; tickSound.play().catch(()=>{}); lastTickIdx = idx; }
+            updateArrow(vel);
+        }
         requestAnimationFrame(mainLoop);
     }
 
@@ -222,7 +239,10 @@
             let ease = (t < 0.2) ? (t / 0.2) * (t / 0.2) * 0.1 : 0.1 + 0.9 * (1 - Math.pow(1 - (t - 0.2) / 0.8, 5));
             angle = startAngle + totalRotation * ease;
             const velocity = angle - prevAngle; prevAngle = angle;
-            checkTick(); draw(); updateArrow(velocity);
+            const arc = (2 * Math.PI) / options.length;
+            const idx = Math.floor(((angle + Math.PI * 1.5) % (Math.PI * 2)) / arc);
+            if (idx !== lastTickIdx) { tickSound.currentTime = 0; tickSound.play().catch(()=>{}); lastTickIdx = idx; }
+            draw(); updateArrow(velocity);
             if (t < 1) requestAnimationFrame(update);
             else { spinning = false; arrowAngle = 0; arrowEl.style.transform = `rotate(0deg)`; if (spinAudio) { let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50); } finish(); }
         }
@@ -242,8 +262,8 @@
         let flavor = "ВЫИГРЫШ!";
         for (let [p, t] of Object.entries(settings.flavorTexts || {})) { if (winner.includes(p)) flavor = t; }
         document.getElementById('winner-flavor').innerText = flavor;
+        document.getElementById('winner-name').innerText = winner;
         const nameEl = document.getElementById('winner-name');
-        nameEl.innerText = winner;
         let baseSize = 48;
         if (winner.length > 35) baseSize = 20;
         else if (winner.length > 25) baseSize = 26;
