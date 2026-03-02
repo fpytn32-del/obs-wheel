@@ -6,29 +6,28 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 const ADMIN_PASSWORD = "VikaWheel2024";
 
 const initialData = {
-    options: ["Ничего", "Приз 1"],
+    options: ["Ничего", "Приз 1", "Приз 2"],
     history: [],
     settings: { 
         spinSound: "spin.mp3",
         startBtnText: "Да-да, Нет-нет",
-        historyTitle: "ИСТОРИЯ ВЫИГРЫШЕЙ",
-        centerImage: "",
+        centerImage: "https://media.tenor.com/On79Z75UvS8AAAAC/cat-dance.gif",
         spinTime: 12000,
         flavorTexts: {},
         autoDelete: false,
         remoteTrigger: 0,
-        panelOpacity: 0.7,
+        // ДИЗАЙН ПАНЕЛЕЙ
+        panelOpacity: 0.6,
         panelBlur: 15,
-        // ПОЗИЦИИ И РАЗМЕРЫ
-        startBtnTop: 100, startBtnLeft: 50, startBtnWidth: 500, startBtnHeight: 110,
-        historyTop: 260, historyLeft: 50, historyWidth: 340, historyHeight: 200,
-        // ШРИФТЫ
-        fontWheel: 14, fontWheelFamily: 'Inter',
-        fontBtn: 50, fontBtnFamily: 'Inter',
-        fontHist: 15, fontHistFamily: 'Inter',
-        fontHistTitle: 11,
-        // СТРЕЛКА
-        arrowType: 'classic', arrowColor: '#ffffff'
+        panelBorderWidth: 3,
+        // ПОЗИЦИИ (в px или %)
+        startBtnTop: 250, startBtnLeft: 50,
+        historyTop: 500, historyLeft: 50,
+        // РАЗМЕРЫ ТЕКСТА
+        fontWheel: 14, fontBtn: 50, fontHist: 18,
+        // ЦВЕТА
+        wheelBorderColor: "#1a1a1a",
+        goldRingColor: "#ffd700"
     },
     lastUpdate: Date.now()
 };
@@ -58,7 +57,9 @@ const server = http.createServer((req, res) => {
         req.on('end', () => {
             try {
                 const incoming = JSON.parse(body);
-                if (incoming.password !== ADMIN_PASSWORD) { res.writeHead(403); return res.end(); }
+                if (incoming.password !== ADMIN_PASSWORD) {
+                    res.writeHead(403); return res.end();
+                }
                 const currentData = JSON.parse(fs.readFileSync(DATA_FILE));
                 const newData = { ...currentData, ...incoming, lastUpdate: Date.now() };
                 delete newData.password;
