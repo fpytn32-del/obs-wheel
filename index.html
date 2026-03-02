@@ -12,36 +12,56 @@
 
         .glass-panel {
             position: fixed; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(212, 175, 55, var(--op, 0.7)) 0%, rgba(138, 109, 59, var(--op, 0.8)) 100%);
-            backdrop-filter: blur(calc(var(--blur, 15) * 1px)); border: 3px solid #fff; border-radius: 35px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.5); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.7) 0%, rgba(138, 109, 59, 0.8) 100%);
+            backdrop-filter: blur(15px); border: 3px solid #fff; border-radius: 35px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.5); z-index: 500;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: all 0.8s ease; padding: 10px; box-sizing: border-box; text-align: center;
         }
         body:not(.idle) .glass-panel { opacity: 0; visibility: hidden; }
 
         .start-text { 
-            color: #fff; font-size: var(--fbtn-size, 50px); font-weight: 900; text-transform: uppercase; 
-            letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 900; text-transform: uppercase; 
+            letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;
         }
 
         #history-title { 
-            width: 90%; font-size: var(--fhist-title-size, 11px); font-weight: 900; letter-spacing: 3px; color: #fff; 
-            margin-top: 5px; margin-bottom: 5px; text-shadow: 1px 1px 3px #000;
-            word-wrap: break-word; /* Фикс вылета за края */
+            width: 90%; font-family: 'Inter'; font-weight: 900; letter-spacing: 3px; color: #fff; 
+            margin-top: 5px; margin-bottom: 5px; text-shadow: 1px 1px 3px #000; overflow: hidden;
         }
-        #history-viewport { width: 100%; flex: 1; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent); }
-        #history-list { display: flex; flex-direction: column; align-items: center; width: 100%; position: absolute; bottom: -100%; left: 0; animation: conveyor-scroll 15s linear infinite; }
-        @keyframes conveyor-scroll { 0% { transform: translateY(100%); } 100% { transform: translateY(-100%); } }
-        .history-item { color: #fff; font-size: var(--fhist-size, 15px); font-weight: 800; padding: 8px 0; width: 95%; text-align: center; text-transform: uppercase; text-shadow: 1px 1px 4px #000; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        #history-viewport { 
+            width: 100%; flex: 1; overflow: hidden; position: relative; 
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+        }
+        
+        #history-list { 
+            display: flex; flex-direction: column; align-items: center; width: 100%; 
+            position: absolute; left: 0;
+            animation: conveyor-scroll 15s linear infinite; 
+        }
+        @keyframes conveyor-scroll { 
+            0% { transform: translateY(140px); } 
+            100% { transform: translateY(-100%); } 
+        }
+
+        .history-item { 
+            color: #fff; font-weight: 800; padding: 8px 0; width: 95%; 
+            text-align: center; text-transform: uppercase; text-shadow: 1px 1px 4px #000; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+        }
 
         .winner-plate { background: linear-gradient(145deg, #111, #000); padding: 40px 50px; border-radius: 50px; border: 3px solid #ffd700; text-align: center; backdrop-filter: blur(40px); width: 520px; box-sizing: border-box; box-shadow: 0 0 100px #000; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 600; opacity: 0; visibility: hidden; transition: 0.8s; }
         body.winner-active .winner-plate { opacity: 1; visibility: visible; }
+        
+        /* ЗАГОЛОВОК ВЫИГРЫША MONTSERRAT */
         #winner-flavor { color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 8px; margin-bottom: 15px; display: block; text-transform: uppercase; }
-        #winner-name { color: #fff; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.1; text-transform: uppercase; word-wrap: break-word; }
+        #winner-name { color: #fff; font-family: 'Inter', sans-serif; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.1; text-transform: uppercase; word-wrap: break-word; }
 
         #wheel-wrapper { position: relative; width: 620px; height: 620px; filter: drop-shadow(0 20px 60px rgba(0,0,0,0.7)); }
         #center-logo-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 112px; height: 112px; border-radius: 50%; border: 6px solid #1a1a1a; z-index: 60; overflow: hidden; background: #000; }
-        #center-img { width: 100%; height: 100%; object-fit: cover; }
+        #center-img { width: 100%; height: 100%; object-fit: cover; display: block; }
         #arrow-container { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); z-index: 100; width: 50px; height: 70px; }
         #arrow { width: 100%; height: 100%; transform-origin: 50% 10%; will-change: transform; }
         canvas { display: block; border-radius: 50%; }
@@ -84,42 +104,45 @@
 
     async function syncData() {
         if (spinning) return;
-        const res = await fetch('/api/data');
-        const data = await res.json();
-        if (data.lastUpdate > lastUpdate) {
-            options = data.options; history = data.history || []; settings = data.settings; lastUpdate = data.lastUpdate;
-            const b = document.body;
-            b.style.setProperty('--op', settings.panelOpacity);
-            b.style.setProperty('--blur', settings.panelBlur);
-            b.style.setProperty('--fbtn-size', settings.fontBtn + 'px');
-            b.style.setProperty('--fhist-size', settings.fontHist + 'px');
-            b.style.setProperty('--fhist-title-size', settings.fontHistTitle + 'px');
+        try {
+            const res = await fetch('/api/data');
+            const data = await res.json();
+            if (data.lastUpdate > lastUpdate) {
+                options = data.options; history = data.history || []; settings = data.settings; lastUpdate = data.lastUpdate;
+                
+                // Применяем настройки
+                const sNode = document.getElementById('start-node');
+                sNode.style.width = settings.startBtnWidth + "px";
+                sNode.style.height = settings.startBtnHeight + "px";
+                sNode.style.top = settings.startBtnTop + "px";
+                
+                const stText = document.querySelector('.start-text');
+                stText.innerText = settings.startBtnText;
+                stText.style.fontFamily = settings.fontBtnFamily;
+                stText.style.fontSize = settings.fontBtn + "px";
 
-            const sNode = document.getElementById('start-node');
-            sNode.style.width = settings.startBtnWidth + "px";
-            sNode.style.height = settings.startBtnHeight + "px";
-            sNode.style.top = settings.startBtnTop + "px";
-            
-            const hNode = document.getElementById('history-node');
-            hNode.style.width = settings.historyWidth + "px";
-            hNode.style.height = settings.historyHeight + "px";
-            hNode.style.top = settings.historyTop + "px";
+                const hNode = document.getElementById('history-node');
+                hNode.style.width = settings.historyWidth + "px";
+                hNode.style.height = settings.historyHeight + "px";
+                hNode.style.top = settings.historyTop + "px";
+                
+                const hTitle = document.getElementById('history-title');
+                hTitle.innerText = settings.historyTitle;
+                hTitle.style.fontSize = settings.fontHistTitle + "px";
 
-            document.querySelector('.start-text').innerText = settings.startBtnText;
-            document.getElementById('history-title').innerText = settings.historyTitle;
-            document.getElementById('center-img').src = parseGifUrl(settings.centerImage);
-            
-            arrowEl.innerHTML = `<path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="${settings.arrowColor}" stroke="#fff" stroke-width="2"/>`;
+                document.getElementById('center-img').src = parseGifUrl(settings.centerImage);
+                arrowEl.innerHTML = `<path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="${settings.arrowColor}" stroke="#fff" stroke-width="2"/>`;
 
-            if (settings.remoteTrigger > lastRemoteTrigger && lastRemoteTrigger !== 0) startSpin();
-            lastRemoteTrigger = settings.remoteTrigger;
-            updateHistoryUI(); draw();
-        }
+                if (settings.remoteTrigger > lastRemoteTrigger && lastRemoteTrigger !== 0) startSpin();
+                lastRemoteTrigger = settings.remoteTrigger;
+                updateHistoryUI(); draw();
+            }
+        } catch (e) {}
     }
 
     function updateHistoryUI() {
         const list = document.getElementById('history-list');
-        const itemsHTML = (history || []).slice().reverse().map(h => `<div class="history-item">${h}</div>`).join('');
+        const itemsHTML = (history || []).slice().reverse().map(h => `<div class="history-item" style="font-family:${settings.fontHistFamily}; font-size:${settings.fontHist}px">${h}</div>`).join('');
         list.innerHTML = itemsHTML + itemsHTML;
     }
 
@@ -134,7 +157,7 @@
             ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 4; ctx.stroke();
             ctx.save(); ctx.rotate(angle + i * arc + arc / 2);
             ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 2.5;
-            ctx.font = `900 ${settings.fontWheel}px Inter`; ctx.textAlign = "center";
+            ctx.font = `900 ${settings.fontWheel}px ${settings.fontWheelFamily}`; ctx.textAlign = "center";
             let display = text.toUpperCase();
             if (ctx.measureText(display).width > 150) { while(ctx.measureText(display + "...").width > 150) display = display.slice(0, -1); display += "..."; }
             ctx.strokeText(display, textRadius, 5); ctx.fillStyle = "#fff"; ctx.fillText(display, textRadius, 5);
@@ -156,8 +179,7 @@
     function startSpin() {
         if (spinning || !options.length) return;
         if (settings.spinSound) { spinAudio.src = settings.spinSound; spinAudio.volume = 0.5; spinAudio.play().then(() => { spinAudio.pause(); spinAudio.currentTime = 0; }); }
-        document.body.classList.remove('idle');
-        document.body.classList.remove('winner-active');
+        document.body.classList.remove('idle', 'winner-active');
         setTimeout(spin, 800);
     }
 
@@ -177,7 +199,7 @@
             if (idx !== lastTickIdx) { tickSound.currentTime = 0; tickSound.play().catch(()=>{}); lastTickIdx = idx; }
             draw();
             if (t < 1) requestAnimationFrame(update);
-            else { spinning = false; finish(); }
+            else { spinning = false; arrowAngle = 0; arrowEl.style.transform = `rotate(0deg)`; if (spinAudio) { let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50); } finish(); }
         }
         requestAnimationFrame(update);
     }
@@ -189,7 +211,8 @@
         const winner = options[idx];
         if (winner.includes("Джекпот")) {
             const end = Date.now() + 5000;
-            (function frame() { confetti({ particleCount: 12, origin: { x: Math.random(), y: -0.2 }, colors: ['#FFD700'], shapes: ['circle'], gravity: 1.2, scalar: 2 }); if (Date.now() < end) requestAnimationFrame(frame); }());
+            const colors = ['#FFD700', '#D4AF37', '#FFDF00'];
+            (function frame() { confetti({ particleCount: 12, origin: { x: Math.random(), y: -0.2 }, colors, shapes: ['circle'], gravity: 1.2, scalar: 2 }); if (Date.now() < end) requestAnimationFrame(frame); }());
         } else if (!winner.includes("Ничего")) { confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } }); }
         
         let flavor = "ВЫИГРЫШ!";
@@ -205,6 +228,7 @@
         if (settings.autoDelete) options.splice(idx, 1);
         const pass = localStorage.getItem('spin_pass') || "VikaWheel2024";
         await fetch('/api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ options, history, settings, password: pass }) });
+        updateHistoryUI();
         autoResetTimer = setTimeout(resetToIdle, 15000);
     }
 
