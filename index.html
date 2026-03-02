@@ -2,138 +2,127 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Montserrat:wght@900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body { margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Inter', sans-serif; background: transparent; }
-        #main-layout { position: relative; transition: 1.2s ease; }
+        #main-layout { position: relative; transition: filter 1.2s ease, transform 1.2s ease; will-change: filter, transform; }
         body.idle #main-layout { filter: blur(10px) brightness(0.3); transform: scale(0.92); }
         body.winner-active #main-layout { filter: brightness(0.1) blur(25px); transform: scale(0.8); }
-
-        .glass-panel {
-            position: fixed; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.7) 0%, rgba(138, 109, 59, 0.8) 100%);
-            backdrop-filter: blur(15px); border: 3px solid #fff; border-radius: 35px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.5); z-index: 500;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: all 0.8s ease; padding: 10px; box-sizing: border-box; text-align: center;
-        }
-        body:not(.idle) .glass-panel { opacity: 0; visibility: hidden; }
-
-        .start-text { color: #fff; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
-
-        #history-title { width: 90%; font-weight: 900; letter-spacing: 3px; color: #fff; margin-top: 5px; margin-bottom: 5px; text-shadow: 1px 1px 3px #000; overflow: hidden; }
-        #history-viewport { width: 100%; flex: 1; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent); }
-        
-        #history-list { 
-            display: flex; flex-direction: column; align-items: center; width: 100%; 
-            position: absolute; left: 0;
-            animation: conveyor 15s linear infinite; 
-        }
-        @keyframes conveyor { 0% { transform: translateY(140px); } 100% { transform: translateY(-100%); } }
-
-        .list-item { color: #fff; font-weight: 800; padding: 6px 0; width: 95%; text-align: center; text-transform: uppercase; text-shadow: 1px 1px 4px #000; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        .winner-plate { background: linear-gradient(145deg, #111, #000); padding: 40px 50px; border-radius: 50px; border: 3px solid #ffd700; text-align: center; backdrop-filter: blur(40px); width: 520px; box-sizing: border-box; box-shadow: 0 0 100px #000; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 600; opacity: 0; visibility: hidden; transition: 0.8s; }
-        body.winner-active .winner-plate { opacity: 1; visibility: visible; }
-        #winner-flavor { color: #ffd700; font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 8px; margin-bottom: 15px; display: block; text-transform: uppercase; }
-        #winner-name { color: #fff; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.1; text-transform: uppercase; word-wrap: break-word; }
-
+        #ui-column { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 500; pointer-events: none; transition: 0.8s; }
+        body:not(.idle) #ui-column { opacity: 0; visibility: hidden; }
+        .start-plate { background: rgba(255, 215, 0, 0.1); backdrop-filter: blur(15px); border: 3px solid #ffd700; padding: 35px 70px; border-radius: 30px; color: #fff; font-size: 50px; font-weight: 900; cursor: pointer; pointer-events: auto; animation: pulse 2.5s infinite; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 4px; }
+        #history-container { width: 420px; height: 260px; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px; overflow: hidden; pointer-events: auto; }
+        #history-container::before { content: "ИСТОРИЯ ВЫИГРЫШЕЙ"; display: block; text-align: center; padding: 12px; font-size: 11px; color: #ffd700; letter-spacing: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 800; }
+        #history-list { display: flex; flex-direction: column; align-items: center; padding: 10px; }
+        .history-item { color: rgba(255,255,255,0.8); font-size: 17px; font-weight: 700; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.03); width: 100%; text-align: center; }
+        #winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 600; cursor: pointer; opacity: 0; visibility: hidden; transition: 0.8s; }
+        body.winner-active #winner-overlay { opacity: 1; visibility: visible; }
+        #winner-overlay.closing { pointer-events: none; }
+        .winner-plate { background: linear-gradient(145deg, #151515, #000); padding: 70px 100px; border-radius: 60px; border: 2px solid #ffd700; text-align: center; backdrop-filter: blur(40px); box-shadow: 0 0 100px rgba(0,0,0,1); }
+        #winner-flavor { color: #ffd700; font-size: 24px; font-weight: 800; letter-spacing: 10px; margin-bottom: 25px; display: block; text-transform: uppercase; }
+        #winner-name { color: #fff; font-size: 55px; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.2; text-transform: uppercase; }
         #wheel-wrapper { position: relative; width: 620px; height: 620px; filter: drop-shadow(0 20px 60px rgba(0,0,0,0.7)); }
         #center-logo-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 112px; height: 112px; border-radius: 50%; border: 6px solid #1a1a1a; z-index: 60; overflow: hidden; background: #000; }
-        #center-img { width: 100%; height: 100%; object-fit: cover; }
-        #dragon-overlay { position: fixed; z-index: 58; pointer-events: none; animation: dragFloat 4s infinite ease-in-out; transform: translate(-50%, -50%); }
-        @keyframes dragFloat { 0%, 100% { margin-top: 0; } 50% { margin-top: -15px; } }
-        #arrow-container { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); z-index: 100; width: 50px; height: 70px; }
+        #arrow-container { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); z-index: 100; width: 45px; height: 65px; }
         #arrow { width: 100%; height: 100%; transform-origin: 50% 10%; will-change: transform; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
         canvas { display: block; border-radius: 50%; }
     </style>
 </head>
 <body class="idle">
 
 <div id="ui-column">
-    <div id="start-node" class="glass-panel" onclick="startSpin()"><p class="start-text" id="start-label"></p></div>
-    <div id="history-node" class="glass-panel"><div id="history-title"></div><div id="history-viewport"><div id="history-list"></div></div></div>
+    <div class="start-plate" onclick="startSpin()">Да-да, Нет-нет</div>
+    <div id="history-container"><div id="history-list"></div></div>
 </div>
 
-<div class="winner-plate" onclick="resetToIdle()"><span id="winner-flavor"></span><p id="winner-name"></p></div>
+<div id="winner-overlay" onclick="resetToIdle()">
+    <div class="winner-plate">
+        <span id="winner-flavor"></span>
+        <p id="winner-name"></p>
+    </div>
+</div>
 
 <div id="main-layout">
-    <div id="dragon-overlay"><img id="dragon-img" src="" style="width:100%; height:100%;"></div>
     <div id="wheel-wrapper">
-        <div id="center-logo-container"><img id="center-img" src=""></div>
+        <div id="center-logo-container"><div class="tenor-gif-embed" data-postid="16943432931705998786" data-share-method="host" data-aspect-ratio="1" data-width="100%"></div></div>
         <div id="arrow-container"><svg id="arrow" viewBox="0 0 40 60"><path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="#fff" stroke="#000" stroke-width="2"/></svg></div>
         <canvas id="wheel" width="620" height="620"></canvas>
     </div>
 </div>
 
+<script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+
 <script>
-    let options = [], history = [], settings = {}, lastUpdate = 0, lastRemote = 0;
-    let angle = 0, spinning = false, lastTick = -1, arrowAngle = 0, spinAudio = new Audio();
+    let options = [], history = [], settings = {}, lastUpdate = 0;
+    let angle = 0, spinning = false, lastTickIdx = -1;
+    let arrowAngle = 0, autoResetTimer = null, spinAudio = new Audio();
+    
     const tickSound = new Audio('https://www.soundjay.com/buttons/button-16.mp3');
-    const canvas = document.getElementById('wheel'), ctx = canvas.getContext('2d'), arrowEl = document.getElementById('arrow');
+    const canvas = document.getElementById('wheel'), ctx = canvas.getContext('2d');
+    const arrowEl = document.getElementById('arrow');
 
-    function parseGif(url) { if (!url || !url.includes('tenor.com/view/')) return url; return `https://media.tenor.com/${url.split('-').pop()}/tenor.gif`; }
-
-    async function sync() {
-        if (spinning) return;
-        const res = await fetch('/api/data');
-        const data = await res.json();
-        if (data.lastUpdate > lastUpdate) {
-            options = data.options; history = data.history || []; settings = data.settings; lastUpdate = data.lastUpdate;
-            
-            const s = settings;
-            const sn = document.getElementById('start-node');
-            sn.style.width = s.startBtnWidth+"px"; sn.style.height = s.startBtnHeight+"px"; sn.style.top = s.startBtnTop+"px";
-            const sl = document.getElementById('start-label');
-            sl.innerText = s.startBtnText; sl.style.fontSize = s.fontBtn+"px";
-
-            const hn = document.getElementById('history-node');
-            hn.style.width = s.historyWidth+"px"; hn.style.height = s.historyHeight+"px"; hn.style.top = s.historyTop+"px";
-            const ht = document.getElementById('history-title');
-            ht.innerText = s.historyTitle; ht.style.fontSize = s.fontHistTitle+"px";
-
-            document.getElementById('center-img').src = parseGif(s.centerImage);
-            const dr = document.getElementById('dragon-overlay');
-            dr.style.left = s.dragonX+"%"; dr.style.top = s.dragonY+"%"; dr.style.width = s.dragonSize+"px";
-            document.getElementById('dragon-img').src = s.dragonImg;
-
-            if (s.remoteTrigger > lastRemote && lastRemote !== 0) startSpin();
-            lastRemote = s.remoteTrigger;
-            updateHistory(); draw();
-        }
+    function getFlavorText(winner) {
+        const text = winner.trim();
+        if (text === "Ничего") return "Облом!";
+        if (text === "Джекпот — 10 000 ₽") return "ДА ТЫ СЧАСТЛИВЧИК!";
+        if (text.includes("баланс казино")) return "Ну хоть поиграешь)";
+        if (text.toLowerCase().includes("бонуска") || text.includes("Беру повторку")) return "Ну хоть бонуску посмотрим!";
+        if (text === "Делаю депозитное колесо на 5 000 ₽") return "Ни тебе, ни мне";
+        if (text === "Модератор на 24 часа") return "Поработай немного!";
+        return "ВЫИГРЫШ!";
     }
 
-    function updateHistory() {
-        const hList = document.getElementById('history-list');
-        const items = history.slice().reverse().map(h => `<div class="list-item" style="font-size:${settings.fontHist}px">${h}</div>`).join('');
-        hList.innerHTML = items + items;
+    async function syncData() {
+        if (spinning) return;
+        try {
+            const res = await fetch('/api/data');
+            const data = await res.json();
+            if (data.lastUpdate > lastUpdate) {
+                options = data.options; history = data.history || []; settings = data.settings;
+                lastUpdate = data.lastUpdate;
+                document.querySelector('.start-plate').innerText = settings.startBtnText || "Да-да, Нет-нет";
+                updateHistoryUI(); draw();
+            }
+        } catch (e) {}
+    }
+
+    function updateHistoryUI() {
+        document.getElementById('history-list').innerHTML = history.slice(-6).reverse().map(h => `<div class="history-item">${h}</div>`).join('');
     }
 
     function draw() {
         if (!options.length) return;
         const arc = (2 * Math.PI) / options.length;
-        ctx.clearRect(0, 0, 620, 620); ctx.save(); ctx.translate(310, 310);
+        const centerX = 310, centerY = 310, radius = 300, innerHole = 60, textRadius = (radius + innerHole) / 2;
+        ctx.clearRect(0, 0, 620, 620); ctx.save(); ctx.translate(centerX, centerY);
         options.forEach((text, i) => {
             ctx.fillStyle = `hsl(${(i * 360) / options.length}, 55%, 40%)`;
-            ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 300, angle + i * arc, angle + (i + 1) * arc); ctx.fill();
-            ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 4; ctx.stroke();
-            ctx.save(); ctx.rotate(angle + i * arc + arc/2);
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, radius, angle + i * arc, angle + (i + 1) * arc); ctx.fill();
+            ctx.save(); ctx.rotate(angle + i * arc + arc / 2);
             ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 2.5;
-            ctx.font = `900 ${settings.fontWheel}px Inter`; ctx.textAlign = "center";
-            let d = text.toUpperCase();
-            if (ctx.measureText(d).width > 150) { while(ctx.measureText(d+"...").width > 150) d = d.slice(0, -1); d += "..."; }
-            ctx.strokeText(d, 180, 5); ctx.fillStyle = "#fff"; ctx.fillText(d, 180, 5);
+            ctx.font = `900 14px Inter`; ctx.textAlign = "center";
+            let display = text.toUpperCase();
+            if (ctx.measureText(display).width > 150) { while(ctx.measureText(display + "...").width > 150) display = display.slice(0, -1); display += "..."; }
+            ctx.strokeText(display, textRadius, 5); ctx.fillStyle = "#fff"; ctx.fillText(display, textRadius, 5);
             ctx.restore();
         });
-        ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 24; ctx.beginPath(); ctx.arc(0, 0, 290, 0, Math.PI * 2); ctx.stroke();
-        ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 298, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 24; ctx.beginPath(); ctx.arc(0, 0, radius - 10, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, radius - 2, 0, Math.PI * 2); ctx.stroke();
         ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(0, 0, 62, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
 
+    function checkTick() {
+        if (!options.length) return;
+        const arc = (2 * Math.PI) / options.length;
+        const idx = Math.floor(((angle + Math.PI * 1.5) % (Math.PI * 2)) / arc);
+        if (idx !== lastTickIdx) { tickSound.currentTime = 0; tickSound.play().catch(()=>{}); lastTickIdx = idx; }
+    }
+
     function mainLoop() {
-        if (!spinning) { angle += 0.003; draw(); }
+        if (!spinning) { angle += 0.003; draw(); checkTick(); }
         arrowAngle += (-Math.min((spinning?0.05:0.003)*1300, 35) - arrowAngle) * 0.2;
         arrowEl.style.transform = `rotate(${arrowAngle}deg)`;
         requestAnimationFrame(mainLoop);
@@ -141,21 +130,39 @@
 
     function startSpin() {
         if (spinning || !options.length) return;
-        if (settings.spinSound) { spinAudio.src = settings.spinSound; spinAudio.volume = 0.5; spinAudio.play().then(() => { spinAudio.pause(); spinAudio.currentTime = 0; }); }
+        
+        // РАЗБЛОКИРОВКА И ПОДГОТОВКА ЗВУКА
+        if (settings.spinSound) {
+            spinAudio.src = settings.spinSound;
+            spinAudio.volume = 0.5;
+            spinAudio.play().then(() => { spinAudio.pause(); spinAudio.currentTime = 0; });
+        }
+
         document.body.classList.remove('idle', 'winner-active');
+        document.getElementById('winner-overlay').classList.remove('closing');
+        clearTimeout(autoResetTimer);
         setTimeout(spin, 800);
     }
 
     function spin() {
         spinning = true;
         if (spinAudio.src) spinAudio.play().catch(()=>{});
-        const start = performance.now(), duration = settings.spinTime || 12000, startAngle = angle;
+
+        const start = performance.now(), startAngle = angle, duration = 12000;
         const totalRotation = (Math.PI * 50) + (Math.random() * Math.PI * 20);
+        let prevAngle = startAngle;
+        
         function update(now) {
             const t = Math.min((now - start) / duration, 1);
-            angle = startAngle + totalRotation * (t < 0.2 ? (t/0.2)*(t/0.2)*0.1 : 0.1 + 0.9 * (1 - Math.pow(1 - (t - 0.2) / 0.8, 5)));
-            draw(); if (t < 1) requestAnimationFrame(update);
-            else { spinning = false; if (spinAudio) { let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50); } finish(); }
+            let ease = (t < 0.2) ? (t / 0.2) * (t / 0.2) * 0.1 : 0.1 + 0.9 * (1 - Math.pow(1 - (t - 0.2) / 0.8, 5));
+            angle = startAngle + totalRotation * ease;
+            checkTick(); draw();
+            if (t < 1) requestAnimationFrame(update);
+            else { 
+                spinning = false; 
+                let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50);
+                finish(); 
+            }
         }
         requestAnimationFrame(update);
     }
@@ -165,27 +172,31 @@
         const normalized = (Math.PI * 1.5 - angle) % (Math.PI * 2);
         const idx = Math.floor((normalized < 0 ? normalized + Math.PI * 2 : normalized) / arc);
         const winner = options[idx];
-        if (winner.includes("Джекпот")) {
+        if (winner === "Джекпот — 10 000 ₽") {
             const end = Date.now() + 5000;
-            (function frame() { confetti({ particleCount: 12, origin: { x: Math.random(), y: -0.2 }, colors: ['#ffd700'], shapes: ['circle'], gravity: 1.2, scalar: 2 }); if (Date.now() < end) requestAnimationFrame(frame); }());
-        } else if (!winner.includes("Ничего")) { confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } }); }
-        
-        let flavor = "ВЫИГРЫШ!";
-        for (let [p, t] of Object.entries(settings.flavorTexts || {})) { if (winner.includes(p)) flavor = t; }
-        document.getElementById('winner-flavor').innerText = flavor;
+            const colors = ['#FFD700', '#D4AF37', '#FFDF00'];
+            (function frame() { confetti({ particleCount: 12, origin: { x: Math.random(), y: -0.2 }, colors, shapes: ['circle'], gravity: 1.2, scalar: 2 }); if (Date.now() < end) requestAnimationFrame(frame); }());
+        } else if (winner !== "Ничего") { confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } }); }
+        document.getElementById('winner-flavor').innerText = getFlavorText(winner);
         document.getElementById('winner-name').innerText = winner;
-        let bs = 48; if (winner.length > 35) bs = 20; else if (winner.length > 25) bs = 26; else if (winner.length > 15) bs = 34;
-        document.getElementById('winner-name').style.fontSize = bs + "px";
         document.body.classList.add('winner-active');
         history.push(winner);
-        if (settings.autoDelete) options.splice(idx, 1);
-        const pass = localStorage.getItem('spin_pass') || "VikaWheel2024";
-        await fetch('/api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...fullData, options, history, password: pass }) });
+        await fetch('/api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ options, history, settings }) });
+        updateHistoryUI();
         autoResetTimer = setTimeout(resetToIdle, 15000);
     }
 
-    function resetToIdle() { if (spinning) return; document.body.classList.remove('winner-active'); setTimeout(() => { if (!spinning) document.body.classList.add('idle'); }, 1000); }
-    setInterval(sync, 2000); sync(); requestAnimationFrame(mainLoop);
+    function resetToIdle() {
+        if (spinning) return;
+        const overlay = document.getElementById('winner-overlay');
+        if (overlay.classList.contains('closing')) return;
+        clearTimeout(autoResetTimer);
+        overlay.classList.add('closing');
+        document.body.classList.remove('winner-active');
+        setTimeout(() => { if (!spinning) { document.body.classList.add('idle'); overlay.classList.remove('closing'); } }, 1000);
+    }
+
+    setInterval(syncData, 2000); syncData(); requestAnimationFrame(mainLoop);
 </script>
 </body>
 </html>
