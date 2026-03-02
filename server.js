@@ -14,11 +14,20 @@ const initialData = {
         centerImage: "https://media.tenor.com/On79Z75UvS8AAAAC/cat-dance.gif",
         spinTime: 12000,
         flavorTexts: {},
-        // НОВЫЕ НАСТРОЙКИ ДИЗАЙНА
-        startBtnY: 250,
-        historyY: 450,
         autoDelete: false,
-        remoteTrigger: 0
+        remoteTrigger: 0,
+        // ДИЗАЙН ПАНЕЛЕЙ
+        panelOpacity: 0.6,
+        panelBlur: 15,
+        panelBorderWidth: 3,
+        // ПОЗИЦИИ (в px или %)
+        startBtnTop: 250, startBtnLeft: 50,
+        historyTop: 500, historyLeft: 50,
+        // РАЗМЕРЫ ТЕКСТА
+        fontWheel: 14, fontBtn: 50, fontHist: 18,
+        // ЦВЕТА
+        wheelBorderColor: "#1a1a1a",
+        goldRingColor: "#ffd700"
     },
     lastUpdate: Date.now()
 };
@@ -29,7 +38,6 @@ const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
     if (req.method === 'GET') {
         if (req.url === '/api/data') {
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -61,4 +69,4 @@ const server = http.createServer((req, res) => {
         });
     }
 });
-server.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server on ${PORT}`));
+server.listen(PORT, '0.0.0.0');
