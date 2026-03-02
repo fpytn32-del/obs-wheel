@@ -9,24 +9,18 @@
         #main-layout { position: relative; transition: 1.2s ease; }
         body.idle #main-layout { filter: blur(10px) brightness(0.3); transform: scale(0.92); }
         body.winner-active #main-layout { filter: brightness(0.1) blur(25px); transform: scale(0.8); }
-
-        .glass-panel {
-            position: fixed; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(212, 175, 55, var(--op, 0.7)) 0%, rgba(138, 109, 59, var(--op, 0.8)) 100%);
-            backdrop-filter: blur(15px); border: 3px solid #fff; border-radius: 35px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.5); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: all 0.8s ease; padding: 10px; box-sizing: border-box; text-align: center;
-        }
-        body:not(.idle) .glass-panel { opacity: 0; visibility: hidden; }
-
-        .start-text { color: #fff; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        #history-title { width: 90%; font-weight: 900; letter-spacing: 3px; color: #fff; margin-top: 5px; margin-bottom: 5px; text-shadow: 1px 1px 3px #000; overflow: hidden; }
-        #history-viewport { width: 100%; flex: 1; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent); }
+        #ui-column { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 500; pointer-events: none; transition: 0.8s; }
+        body:not(.idle) #ui-column { opacity: 0; visibility: hidden; }
+        .start-plate { background: rgba(255, 215, 0, 0.1); backdrop-filter: blur(15px); border: 3px solid #fff; border-radius: 30px; padding: 35px 70px; color: #fff; font-size: 50px; font-weight: 900; cursor: pointer; pointer-events: auto; animation: pulse 2.5s infinite; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 4px; box-shadow: 0 15px 45px rgba(0,0,0,0.5); }
         
-        /* КОНВЕЙЕР С ДИНАМИЧЕСКОЙ СКОРОСТЬЮ */
+        /* ИСТОРИЯ СТАЛА ПРИЗАМИ (КОНВЕЙЕР) */
+        #history-container { width: 340px; height: 200px; background: rgba(212, 175, 55, 0.7); backdrop-filter: blur(15px); border: 3px solid #fff; border-radius: 25px; overflow: hidden; pointer-events: auto; }
+        #history-title { font-size: 11px; font-weight: 900; letter-spacing: 3px; color: #fff; margin-top: 10px; text-shadow: 1px 1px 3px #000; text-align: center; }
+        #history-viewport { width: 100%; height: 140px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent); }
+        
         #history-list { display: flex; flex-direction: column; align-items: center; width: 100%; position: absolute; left: 0; animation: conveyor var(--conv-speed, 15s) linear infinite; }
-        @keyframes conveyor { 0% { transform: translateY(150px); } 100% { transform: translateY(-100%); } }
-        .list-item { color: #fff; font-weight: 800; padding: 8px 0; width: 95%; text-align: center; text-transform: uppercase; text-shadow: 1px 1px 4px #000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        @keyframes conveyor { 0% { transform: translateY(-100%); } 100% { transform: translateY(140px); } } /* СВЕРХУ ВНИЗ */
+        .list-item { color: #fff; font-weight: 800; padding: 8px 0; width: 95%; text-align: center; text-transform: uppercase; text-shadow: 1px 1px 4px #000; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 15px; }
 
         .winner-plate { background: linear-gradient(145deg, #111, #000); padding: 40px 50px; border-radius: 50px; border: 3px solid #ffd700; text-align: center; backdrop-filter: blur(40px); width: 520px; box-sizing: border-box; box-shadow: 0 0 100px #000; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 600; opacity: 0; visibility: hidden; transition: 0.8s; }
         body.winner-active .winner-plate { opacity: 1; visibility: visible; }
@@ -44,51 +38,39 @@
 <body class="idle">
 
 <div id="ui-column">
-    <div id="start-node" class="glass-panel" onclick="startSpin()"><p class="start-text" id="st-label"></p></div>
-    <div id="history-node" class="glass-panel"><div id="history-title"></div><div id="history-viewport"><div id="history-list"></div></div></div>
+    <div class="start-plate" onclick="startSpin()"><p class="start-text" id="st-label">Да-да, Нет-нет</p></div>
+    <div id="history-container" class="glass-panel">
+        <div id="history-title">ПРИЗЫ</div>
+        <div id="history-viewport"><div id="history-list"></div></div>
+    </div>
 </div>
-<div class="winner-plate" onclick="resetToIdle()"><span id="winner-flavor"></span><p id="winner-name"></p></div>
+<div class="winner-plate" onclick="resetToIdle()"><span id="winner-flavor">ВЫИГРЫШ!</span><p id="winner-name"></p></div>
 
 <div id="main-layout">
     <div id="wheel-wrapper">
         <div id="center-logo-container"><img id="center-img" src=""></div>
-        <div id="arrow-container"><svg id="arrow" viewBox="0 0 40 60"></svg></div>
+        <div id="arrow-container"><svg id="arrow" viewBox="0 0 40 60"><path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="#fff" stroke="#000" stroke-width="2"/></svg></div>
         <canvas id="wheel" width="620" height="620"></canvas>
     </div>
 </div>
 
 <script>
-    let options = [], history = [], settings = {}, lastUpdate = 0, lastRemote = 0;
+    let options = [], settings = {}, lastUpdate = 0;
     let angle = 0, spinning = false, lastTick = -1, arrowAngle = 0, spinAudio = new Audio();
     const tickSound = new Audio('https://www.soundjay.com/buttons/button-16.mp3');
     const canvas = document.getElementById('wheel'), ctx = canvas.getContext('2d'), arrowEl = document.getElementById('arrow');
-
-    function parseGif(url) { if (!url || !url.includes('tenor.com/view/')) return url; return `https://media.tenor.com/${url.split('-').pop()}/tenor.gif`; }
 
     async function sync() {
         if (spinning) return;
         const res = await fetch('/api/data');
         const data = await res.json();
         if (data.lastUpdate > lastUpdate) {
-            options = data.options; history = data.history || []; settings = data.settings || {}; lastUpdate = data.lastUpdate;
-            const b = document.body; const s = settings;
-            b.style.setProperty('--op', s.panelOpacity || 0.7); b.style.setProperty('--blur', s.panelBlur || 15);
-            b.style.setProperty('--conv-speed', (s.conveyorSpeed || 15) + 's');
-            
-            const sn = document.getElementById('start-node');
-            sn.style.width = s.startBtnWidth+"px"; sn.style.height = s.startBtnHeight+"px"; sn.style.top = s.startBtnTop+"px";
-            document.getElementById('st-label').innerText = s.startBtnText;
-            document.getElementById('st-label').style.fontSize = s.fontBtn+"px";
-            const hn = document.getElementById('history-node');
-            hn.style.width = s.historyWidth+"px"; hn.style.height = s.historyHeight+"px"; hn.style.top = s.historyTop+"px";
-            document.getElementById('history-title').innerText = s.historyTitle;
-            document.getElementById('history-title').style.fontSize = s.fontHistTitle+"px";
-            document.getElementById('center-img').src = parseGif(s.centerImage);
-            arrowEl.innerHTML = `<path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="#fff" stroke="#000" stroke-width="2"/>`;
-            if (s.remoteTrigger > lastRemote && lastRemote !== 0) startSpin();
-            lastRemote = s.remoteTrigger;
+            options = data.options; settings = data.settings || {}; lastUpdate = data.lastUpdate;
+            document.getElementById('st-label').innerText = settings.startBtnText;
+            document.body.style.setProperty('--conv-speed', (settings.conveyorSpeed || 15) + 's');
             const hList = document.getElementById('history-list');
-            hList.innerHTML = options.map(o => `<div class="list-item" style="font-size:${s.fontHist}px">${o}</div>`).join('') + options.map(o => `<div class="list-item" style="font-size:${s.fontHist}px">${o}</div>`).join('');
+            const items = options.map(o => `<div class="list-item">${o}</div>`).join('');
+            hList.innerHTML = items + items;
             draw();
         }
     }
@@ -97,51 +79,27 @@
         if (!options.length) return;
         const arc = (2 * Math.PI) / options.length;
         ctx.clearRect(0, 0, 620, 620); ctx.save(); ctx.translate(310, 310);
-        
         options.forEach((text, i) => {
             const startAngle = angle + i * arc;
-            // ПРЕМИАЛЬНЫЕ ЦВЕТА
-            const hue = (i * 360) / options.length;
-            ctx.fillStyle = `hsl(${hue}, 70%, 40%)`;
+            ctx.fillStyle = `hsl(${(i * 360) / options.length}, 80%, 50%)`; // ЯРЧЕ
             ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 300, startAngle, startAngle + arc); ctx.fill();
-            
-            // Световой блик внутри сектора
-            const grad = ctx.createRadialGradient(0,0,100,0,0,300);
-            grad.addColorStop(0, 'rgba(255,255,255,0.1)');
-            grad.addColorStop(1, 'rgba(0,0,0,0.2)');
-            ctx.fillStyle = grad; ctx.fill();
-
-            ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 4; ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 4; ctx.stroke(); // РАЗДЕЛИТЕЛИ
             ctx.save(); ctx.rotate(startAngle + arc / 2);
             ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.lineWidth = 2.5;
-            ctx.font = `900 ${settings.fontWheel}px Inter`; ctx.textAlign = "center";
+            ctx.font = `900 14px Inter`; ctx.textAlign = "center";
             let d = text.toUpperCase();
             if (ctx.measureText(d).width > 150) { while(ctx.measureText(d+"...").width > 150) d = d.slice(0, -1); d += "..."; }
             ctx.strokeText(d, 180, 5); ctx.fillStyle = "#fff"; ctx.fillText(d, 180, 5);
             ctx.restore();
         });
-
-        // КАЗИНО ОБОД С ЛАМПОЧКАМИ
         ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 24; ctx.beginPath(); ctx.arc(0, 0, 290, 0, Math.PI * 2); ctx.stroke();
         ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 298, 0, Math.PI * 2); ctx.stroke();
-
-        // Рисуем лампочки (24 штуки)
-        for(let j=0; j<24; j++) {
-            const dotAngle = j * (Math.PI / 12);
-            const isOn = Math.floor((angle * 5) + j) % 2 === 0;
-            ctx.fillStyle = isOn ? '#fff' : '#444';
-            if(isOn) { ctx.shadowBlur = 10; ctx.shadowColor = '#fff'; }
-            ctx.beginPath(); ctx.arc(Math.cos(dotAngle)*290, Math.sin(dotAngle)*290, 4, 0, Math.PI*2); ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-
         ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(0, 0, 62, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
 
-    // УМНАЯ СТРЕЛКА ( возвращается в 0 к концу )
     function updateArrow(vel, t = 0) {
-        // Умножаем на (1-t), чтобы к концу анимации (t=1) отклонение стало нулевым
+        // Умножаем на (1-t) для синхронной остановки в ноль
         let target = -Math.min(vel * 1400 * (1 - t), 35); 
         arrowAngle += (target - arrowAngle) * 0.2;
         if (Math.abs(arrowAngle) < 0.1) arrowAngle = 0;
@@ -173,9 +131,9 @@
             const arc = (2 * Math.PI) / options.length;
             const idx = Math.floor(((angle + Math.PI * 1.5) % (Math.PI * 2)) / arc);
             if (idx !== lastTick) { tickSound.currentTime = 0; tickSound.play().catch(()=>{}); lastTick = idx; }
-            draw(); updateArrow(velocity, t); // Передаем прогресс t
+            draw(); updateArrow(velocity, t);
             if (t < 1) requestAnimationFrame(update);
-            else { spinning = false; arrowAngle = 0; arrowEl.style.transform = `rotate(0deg)`; if (spinAudio) { let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50); } finish(); }
+            else { spinning = false; arrowAngle = 0; arrowEl.style.transform = `rotate(0deg)`; finish(); }
         }
         requestAnimationFrame(update);
     }
@@ -185,24 +143,21 @@
         const normalized = (Math.PI * 1.5 - angle) % (Math.PI * 2);
         const idx = Math.floor((normalized < 0 ? normalized + Math.PI * 2 : normalized) / arc);
         const winner = options[idx];
-        if (winner.includes("Джекпот")) {
-            const end = Date.now() + 5000;
-            const colors = ['#FFD700', '#D4AF37', '#FFDF00'];
-            (function frame() { confetti({ particleCount: 12, origin: { x: Math.random(), y: -0.2 }, colors, shapes: ['circle'], gravity: 1.2, scalar: 2 }); if (Date.now() < end) requestAnimationFrame(frame); }());
-        } else if (!winner.includes("Ничего")) { confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } }); }
-        let flavor = "ВЫИГРЫШ!";
-        for (let [p, t] of Object.entries(settings.flavorTexts || {})) { if (winner.includes(p)) flavor = t; }
-        document.getElementById('winner-flavor').innerText = flavor;
-        document.getElementById('winner-name').innerText = winner;
+        if (winner.includes("Джекпот")) confetti({ particleCount: 250, spread: 100, origin: { y: 0.6 }, colors: ['#ffd700'] });
+        else confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        
+        const nameEl = document.getElementById('winner-name');
+        nameEl.innerText = winner;
+        // АДАПТИВНЫЙ РАЗМЕР
         let bs = 48; if (winner.length > 35) bs = 20; else if (winner.length > 25) bs = 28; else if (winner.length > 15) bs = 36;
-        document.getElementById('winner-name').style.fontSize = bs + "px";
+        nameEl.style.fontSize = bs + "px";
+        
         document.body.classList.add('winner-active');
-        history.push(winner);
-        if (settings.autoDelete) options.splice(idx, 1);
         const pass = localStorage.getItem('spin_pass') || "VikaWheel2024";
-        await fetch('/api/data', { method: 'POST', body: JSON.stringify({ options, history, settings, password: pass }) });
+        await fetch('/api/data', { method: 'POST', body: JSON.stringify({ options, history: [...history, winner], settings, password: pass }) });
         setTimeout(resetToIdle, 15000);
     }
+
     function resetToIdle() { if (spinning) return; document.body.classList.remove('winner-active'); setTimeout(() => { if (!spinning) document.body.classList.add('idle'); }, 1000); }
     setInterval(sync, 2000); sync(); requestAnimationFrame(mainLoop);
 </script>
