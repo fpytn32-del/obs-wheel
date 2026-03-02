@@ -5,11 +5,26 @@ const PORT = process.env.PORT || 10000;
 const DATA_FILE = path.join(__dirname, 'data.json');
 const ADMIN_PASSWORD = "VikaWheel2024";
 
+if (!fs.existsSync(DATA_FILE)) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify({
+        options: ["Ничего", "Приз 1", "Приз 2"],
+        history: [],
+        settings: { 
+            spinSound: "spin.mp3", startBtnText: "Да-да, Нет-нет", historyTitle: "ПРИЗЫ",
+            spinTime: 12000, conveyorSpeed: 15, // Новое
+            startBtnWidth: 500, startBtnHeight: 110, startBtnTop: 100,
+            historyWidth: 340, historyHeight: 200, historyTop: 260,
+            fontWheel: 14, fontBtn: 50, fontHist: 15, fontHistTitle: 11,
+            centerImage: "", arrowColor: "#ffffff", autoDelete: false, flavorTexts: {}
+        },
+        lastUpdate: Date.now()
+    }));
+}
+// ... (остальной код сервера без изменений)
 const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
     if (req.method === 'GET') {
         if (req.url === '/api/data') {
             const data = fs.existsSync(DATA_FILE) ? fs.readFileSync(DATA_FILE) : JSON.stringify({});
@@ -24,21 +39,18 @@ const server = http.createServer((req, res) => {
             res.writeHead(200, { 'Content-Type': mime[ext] || 'text/plain' });
             res.end(fs.readFileSync(fullPath));
         } else res.end();
-
     } else if (req.method === 'POST' && req.url === '/api/data') {
         let body = '';
         req.on('data', chunk => body += chunk.toString());
         req.on('end', () => {
             try {
                 const incoming = JSON.parse(body);
-                if (incoming.password !== ADMIN_PASSWORD) {
-                    res.writeHead(403); return res.end("Wrong Password");
-                }
+                if (incoming.password !== ADMIN_PASSWORD) { res.writeHead(403); return res.end(); }
                 delete incoming.password;
                 incoming.lastUpdate = Date.now();
                 fs.writeFileSync(DATA_FILE, JSON.stringify(incoming, null, 2));
                 res.writeHead(200); res.end(JSON.stringify({ status: 'ok' }));
-            } catch (e) { res.writeHead(400); res.end("Error"); }
+            } catch (e) { res.writeHead(400); res.end(); }
         });
     }
 });
