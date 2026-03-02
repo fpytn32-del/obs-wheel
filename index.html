@@ -19,69 +19,71 @@
         }
         body:not(.idle) #ui-column { opacity: 0; visibility: hidden; }
 
-        /* ОБЩИЙ СТИЛЬ ДЛЯ ЗОЛОТЫХ ПЛАШЕК С RGB ОБВОДКОЙ */
-        .gold-panel {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.8) 0%, rgba(218, 165, 32, 0.8) 50%, rgba(138, 109, 59, 0.8) 100%);
-            backdrop-filter: blur(15px);
-            border: 5px solid #ff0000; /* Базовый цвет для RGB анимации */
-            animation: rgb-border 3s linear infinite;
-            color: #fff;
-            /* Тонкая черная обводка текста */
-            text-shadow: 
-                -1px -1px 0 #000,  
-                 1px -1px 0 #000,
-                -1px  1px 0 #000,
-                 1px  1px 0 #000;
+        /* ЗОЛОТАЯ ПАНЕЛЬ С RGB ОБВОДКОЙ */
+        .premium-panel {
+            position: relative;
+            background: rgba(184, 134, 11, 0.2);
+            backdrop-filter: blur(25px);
+            border-radius: 30px;
+            padding: 4px; /* Толщина RGB обводки */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.6);
         }
 
-        /* КНОПКА ЗАПУСКА */
+        .premium-panel::before {
+            content: '';
+            position: absolute;
+            width: 150%; height: 150%;
+            background: conic-gradient(#ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff, #ff0000);
+            animation: rotateRGB 4s linear infinite;
+            z-index: -1;
+        }
+
+        .panel-content {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.6) 0%, rgba(138, 109, 59, 0.7) 100%);
+            width: 100%; height: 100%;
+            border-radius: 26px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            /* МЯГКИЙ ТЕКСТ */
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5), 0 0 2px rgba(0,0,0,1);
+        }
+
+        @keyframes rotateRGB { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
         .start-plate {
-            padding: 35px 70px; border-radius: 30px; 
-            font-size: 50px; font-weight: 900;
+            width: 500px; height: 120px;
             cursor: pointer; pointer-events: auto; 
             margin-bottom: 30px;
-            text-transform: uppercase; letter-spacing: 4px; 
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            animation: pulseBtn 2.5s infinite ease-in-out;
             transition: transform 0.2s;
         }
         .start-plate:active { transform: scale(0.95); }
+        .start-plate .panel-content { font-size: 50px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; }
 
-        /* КОНТЕЙНЕР ИСТОРИИ */
-        #history-container {
-            width: 420px; height: 260px; 
-            border-radius: 25px; overflow: hidden; pointer-events: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        #history-container { width: 420px; height: 260px; pointer-events: auto; position: relative; }
+        #history-container::after {
+            content: "ИСТОРИЯ ВЫИГРЫШЕЙ"; position: absolute; top: 15px; 
+            font-size: 13px; font-weight: 800; letter-spacing: 4px; color: #fff;
+            text-shadow: 0 0 10px #000; opacity: 0.8;
         }
-        #history-container::before {
-            content: "ИСТОРИЯ ВЫИГРЫШЕЙ"; display: block; text-align: center; padding: 12px;
-            font-size: 13px; color: #fff; letter-spacing: 4px; font-weight: 800;
-            border-bottom: 2px solid rgba(0,0,0,0.2);
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-        }
-        #history-list { display: flex; flex-direction: column; align-items: center; padding: 10px; }
-        .history-item { 
-            color: #fff; font-size: 18px; font-weight: 800; padding: 10px 0; 
-            width: 100%; text-align: center;
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-        }
+        #history-list { display: flex; flex-direction: column; align-items: center; padding-top: 45px; width: 100%; }
+        .history-item { color: #fff; font-size: 18px; font-weight: 800; padding: 8px 0; width: 100%; text-align: center; }
 
-        /* RGB АНИМАЦИЯ ОБВОДКИ */
-        @keyframes rgb-border {
-            0% { border-color: #ff0000; box-shadow: 0 0 20px rgba(255, 0, 0, 0.5); filter: hue-rotate(0deg); }
-            100% { border-color: #ff0000; box-shadow: 0 0 20px rgba(255, 0, 0, 0.5); filter: hue-rotate(360deg); }
-        }
+        @keyframes pulseBtn { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
-        /* ПОБЕДНАЯ ПЛАШКА */
-        #winner-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 600; cursor: pointer; opacity: 0; visibility: hidden; transition: 0.8s;
-        }
+        /* ПОБЕДА */
+        #winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 600; cursor: pointer; opacity: 0; visibility: hidden; transition: 0.8s; }
         body.winner-active #winner-overlay { opacity: 1; visibility: visible; }
-        #winner-overlay.closing { pointer-events: none; }
-        .winner-plate { background: linear-gradient(145deg, #151515, #000); padding: 50px 70px; border-radius: 60px; border: 3px solid #ffd700; text-align: center; backdrop-filter: blur(40px); box-shadow: 0 0 100px rgba(0,0,0,1); max-width: 85%; }
+        .winner-plate { background: linear-gradient(145deg, #1a1a1a, #000); padding: 50px 70px; border-radius: 60px; border: 2px solid #ffd700; text-align: center; backdrop-filter: blur(40px); box-shadow: 0 0 100px rgba(0,0,0,1); max-width: 85%; }
         #winner-flavor { color: #ffd700; font-size: 24px; font-weight: 800; letter-spacing: 10px; margin-bottom: 20px; display: block; text-transform: uppercase; }
-        #winner-name { color: #fff; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.2; text-transform: uppercase; word-wrap: break-word; overflow-wrap: break-word; }
+        #winner-name { color: #fff; font-weight: 900; margin: 0; text-shadow: 0 0 40px rgba(255,215,0,0.6); line-height: 1.2; text-transform: uppercase; word-wrap: break-word; }
 
         /* КОЛЕСО */
         #wheel-wrapper { position: relative; width: 620px; height: 620px; filter: drop-shadow(0 20px 60px rgba(0,0,0,0.7)); }
@@ -89,15 +91,18 @@
         #arrow-container { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); z-index: 100; width: 45px; height: 65px; }
         #arrow { width: 100%; height: 100%; transform-origin: 50% 10%; will-change: transform; }
         #center-img { width: 100%; height: 100%; object-fit: cover; }
-
         canvas { display: block; border-radius: 50%; }
     </style>
 </head>
 <body class="idle">
 
 <div id="ui-column">
-    <div class="start-plate gold-panel" onclick="startSpin()">Да-да, Нет-нет</div>
-    <div id="history-container" class="gold-panel"><div id="history-list"></div></div>
+    <div class="start-plate premium-panel" onclick="startSpin()">
+        <div class="panel-content">Да-да, Нет-нет</div>
+    </div>
+    <div id="history-container" class="premium-panel">
+        <div class="panel-content"><div id="history-list"></div></div>
+    </div>
 </div>
 
 <div id="winner-overlay" onclick="resetToIdle()">
@@ -110,7 +115,11 @@
 <div id="main-layout">
     <div id="wheel-wrapper">
         <div id="center-logo-container"><img id="center-img" src=""></div>
-        <div id="arrow-container"><svg id="arrow" viewBox="0 0 40 60"><path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="#fff" stroke="#000" stroke-width="2"/></svg></div>
+        <div id="arrow-container">
+            <svg id="arrow" viewBox="0 0 40 60">
+                <path d="M20 60 L40 10 Q40 0 30 0 L10 0 Q0 0 0 10 Z" fill="#fff" stroke="#000" stroke-width="2"/>
+            </svg>
+        </div>
         <canvas id="wheel" width="620" height="620"></canvas>
     </div>
 </div>
@@ -131,7 +140,7 @@
             if (data.lastUpdate > lastUpdate) {
                 options = data.options; history = data.history || []; settings = data.settings;
                 lastUpdate = data.lastUpdate;
-                document.querySelector('.start-plate').innerText = settings.startBtnText || "Да-да, Нет-нет";
+                document.querySelector('.start-plate .panel-content').innerText = settings.startBtnText || "Да-да, Нет-нет";
                 document.getElementById('center-img').src = settings.centerImage;
                 updateHistoryUI(); draw();
             }
@@ -139,7 +148,7 @@
     }
 
     function updateHistoryUI() {
-        document.getElementById('history-list').innerHTML = history.slice(-6).reverse().map(h => `<div class="history-item">${h}</div>`).join('');
+        document.getElementById('history-list').innerHTML = (history || []).slice(-6).reverse().map(h => `<div class="history-item">${h}</div>`).join('');
     }
 
     function draw() {
@@ -167,14 +176,34 @@
     function checkTick() {
         if (!options.length) return;
         const arc = (2 * Math.PI) / options.length;
-        const idx = Math.floor(((angle + Math.PI * 1.5) % (Math.PI * 2)) / arc);
+        const currentAngle = (angle + Math.PI * 1.5) % (Math.PI * 2);
+        const idx = Math.floor(currentAngle / arc);
         if (idx !== lastTickIdx) { tickSound.currentTime = 0; tickSound.play().catch(()=>{}); lastTickIdx = idx; }
     }
 
-    function mainLoop() {
-        if (!spinning) { angle += 0.003; draw(); checkTick(); }
-        arrowAngle += (-Math.min((spinning?0.05:0.003)*1300, 35) - arrowAngle) * 0.2;
+    function updateArrow(vel) {
+        // Базовый наклон от скорости
+        let target = -Math.min(vel * 1400, 35); 
+        
+        // Если скорость падает ниже порога, принудительно тянем стрелку в 0
+        let lerpFactor = vel < 0.005 ? 0.25 : 0.15;
+        
+        arrowAngle += (target - arrowAngle) * lerpFactor;
+        
+        // Защита от микро-отклонений в конце
+        if (Math.abs(arrowAngle) < 0.2) arrowAngle = 0;
+        
         arrowEl.style.transform = `rotate(${arrowAngle}deg)`;
+    }
+
+    function mainLoop() {
+        if (!spinning) { 
+            let vel = 0.003; 
+            angle += vel; 
+            draw(); 
+            checkTick();
+            updateArrow(vel);
+        }
         requestAnimationFrame(mainLoop);
     }
 
@@ -182,7 +211,6 @@
         if (spinning || !options.length) return;
         if (settings.spinSound) { spinAudio.src = settings.spinSound; spinAudio.volume = 0.5; spinAudio.play().then(() => { spinAudio.pause(); spinAudio.currentTime = 0; }); }
         document.body.classList.remove('idle', 'winner-active');
-        document.getElementById('winner-overlay').classList.remove('closing');
         clearTimeout(autoResetTimer);
         setTimeout(spin, 800);
     }
@@ -193,16 +221,24 @@
         const start = performance.now(), startAngle = angle, duration = settings.spinTime || 12000;
         const totalRotation = (Math.PI * 50) + (Math.random() * Math.PI * 20);
         let prevAngle = startAngle;
+        
         function update(now) {
             const t = Math.min((now - start) / duration, 1);
             let ease = (t < 0.2) ? (t / 0.2) * (t / 0.2) * 0.1 : 0.1 + 0.9 * (1 - Math.pow(1 - (t - 0.2) / 0.8, 5));
             angle = startAngle + totalRotation * ease;
-            const velocity = angle - prevAngle; prevAngle = angle;
-            checkTick(); draw();
+            const velocity = angle - prevAngle; 
+            prevAngle = angle;
+            
+            checkTick(); 
+            draw(); 
+            updateArrow(velocity);
+
             if (t < 1) requestAnimationFrame(update);
             else { 
                 spinning = false; 
-                let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50);
+                arrowAngle = 0; // Принудительный сброс
+                arrowEl.style.transform = `rotate(0deg)`;
+                if (spinAudio) { let f = setInterval(() => { if(spinAudio.volume > 0.05) spinAudio.volume -= 0.05; else { spinAudio.pause(); clearInterval(f); } }, 50); }
                 finish(); 
             }
         }
@@ -219,10 +255,9 @@
             const colors = ['#FFD700', '#D4AF37', '#FFDF00'];
             (function frame() { confetti({ particleCount: 12, origin: { x: Math.random(), y: -0.2 }, colors, shapes: ['circle'], gravity: 1.2, scalar: 2 }); if (Date.now() < end) requestAnimationFrame(frame); }());
         } else if (winner !== "Ничего") { confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } }); }
-
+        
         let flavor = "ВЫИГРЫШ!";
         for (let [p, t] of Object.entries(settings.flavorTexts || {})) { if (winner.includes(p)) flavor = t; }
-
         document.getElementById('winner-flavor').innerText = flavor;
         document.getElementById('winner-name').innerText = winner;
         const nameEl = document.getElementById('winner-name');
@@ -240,12 +275,8 @@
 
     function resetToIdle() {
         if (spinning) return;
-        const overlay = document.getElementById('winner-overlay');
-        if (overlay.classList.contains('closing')) return;
-        clearTimeout(autoResetTimer);
-        overlay.classList.add('closing');
         document.body.classList.remove('winner-active');
-        setTimeout(() => { if (!spinning) { document.body.classList.add('idle'); overlay.classList.remove('closing'); } }, 1000);
+        setTimeout(() => { if (!spinning) document.body.classList.add('idle'); }, 1000);
     }
     setInterval(syncData, 2000); syncData(); requestAnimationFrame(mainLoop);
 </script>
