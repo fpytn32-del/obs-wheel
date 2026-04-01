@@ -61,18 +61,26 @@
 <script>
     let fullData = { options: [], settings: {}, history: [] };
     let currentPass = localStorage.getItem('spin_pass') || "";
-    async function tryLogin() {
-        const input = document.getElementById('pass-input').value;
-        if (input) currentPass = input;
-        const res = await fetch('/api/data');
-        if (res.status === 200) {
-            fullData = await res.json();
-            localStorage.setItem('spin_pass', currentPass);
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('main-ui').style.display = 'grid';
-            fillUI();
-        } else { alert("Ошибка пароля"); }
+async function tryLogin() {
+    const input = document.getElementById('pass-input').value;
+    if (input) currentPass = input;
+
+    const res = await fetch('/api/data', {
+        headers: {
+            'x-admin-password': currentPass
+        }
+    });
+
+    if (res.status === 200) {
+        fullData = await res.json();
+        localStorage.setItem('spin_pass', currentPass);
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('main-ui').style.display = 'grid';
+        fillUI();
+    } else {
+        alert("Ошибка пароля");
     }
+}
     function fillUI() {
         const s = fullData.settings || {};
         document.getElementById('opts').value = (fullData.options || []).join('\n');
